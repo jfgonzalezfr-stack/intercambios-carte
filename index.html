@@ -14,23 +14,19 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: Georgia, serif; background: var(--beige); color: var(--marron); }
 body { display: flex; flex-direction: column; }
-
 .header { background: var(--marron); color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .header h1 { font-size: 1.25em; }
 .header h1 span { color: var(--verde); }
 .badge { background: var(--verde); color: white; padding: 4px 13px; border-radius: 20px; font-size: 0.83em; font-family: sans-serif; }
-
 .filters { background: white; padding: 9px 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 2px solid var(--verde-light); }
 .filters input, .filters select { padding: 6px 10px; border: 1.5px solid #ddd; border-radius: 7px; font-size: 0.88em; background: var(--beige); color: var(--marron); outline: none; font-family: sans-serif; }
 .filters input { flex: 1 1 170px; }
 .filters input:focus, .filters select:focus { border-color: var(--verde); }
 .btn-reset { padding: 6px 12px; background: var(--marron); color: white; border: none; border-radius: 7px; cursor: pointer; font-size: 0.85em; font-family: sans-serif; }
 .btn-reset:hover { background: var(--verde-dark); }
-
 .legend { background: white; padding: 6px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border-bottom: 1px solid #eee; font-size: 0.8em; font-family: sans-serif; }
 .leg { display: flex; align-items: center; gap: 5px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; }
-
 .layout { display: flex; flex: 1; min-height: 0; }
 .sidebar { width: 300px; min-width: 220px; background: white; overflow-y: auto; border-right: 1px solid #eee; }
 .sidebar-head { padding: 9px 13px; background: var(--verde-light); border-bottom: 1px solid #c8e09a; font-size: 0.85em; font-weight: bold; color: var(--verde-dark); font-family: sans-serif; position: sticky; top: 0; z-index: 5; }
@@ -42,9 +38,7 @@ body { display: flex; flex-direction: column; }
 .tag { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 0.72em; font-weight: bold; color: white; font-family: sans-serif; }
 .empty { padding: 25px 14px; text-align: center; color: #aaa; font-size: 0.88em; font-family: sans-serif; }
 .loading { padding: 30px 14px; text-align: center; color: #888; font-family: sans-serif; font-size: 0.9em; }
-
 #map { flex: 1; min-height: 0; }
-
 .lp { font-family: sans-serif; min-width: 240px; max-width: 280px; }
 .lp-etab { font-family: Georgia, serif; font-size: 1.05em; font-weight: bold; margin-bottom: 3px; color: var(--marron); }
 .lp-ville { color: #888; font-size: 0.82em; margin-bottom: 8px; }
@@ -56,7 +50,6 @@ body { display: flex; flex-direction: column; }
 .lp-rgpd { font-size: 0.72em; color: #aaa; margin-bottom: 8px; font-style: italic; }
 .btn-contact { width: 100%; padding: 9px; background: var(--verde); color: white; border: none; border-radius: 7px; cursor: pointer; font-size: 0.9em; font-weight: bold; font-family: sans-serif; transition: background 0.2s; }
 .btn-contact:hover { background: var(--verde-dark); }
-
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 9999; align-items: center; justify-content: center; }
 .modal-overlay.open { display: flex; }
 .modal { background: white; border-radius: 12px; padding: 28px; width: 90%; max-width: 460px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); position: relative; max-height: 90vh; overflow-y: auto; }
@@ -71,20 +64,17 @@ body { display: flex; flex-direction: column; }
 .modal-rgpd { font-size: 0.75em; color: #888; font-family: sans-serif; margin-bottom: 14px; background: #f9f9f9; padding: 8px; border-radius: 5px; border-left: 3px solid #ddd; }
 .modal-check { display: flex; align-items: flex-start; gap: 8px; font-size: 0.8em; font-family: sans-serif; color: #555; margin-bottom: 14px; }
 .modal-check input[type=checkbox] { width: auto; margin: 2px 0 0 0; flex-shrink: 0; }
-.btn-send { width: 100%; padding: 11px; background: var(--verde); color: white; border: none; border-radius: 7px; cursor: pointer; font-size: 0.95em; font-weight: bold; font-family: sans-serif; transition: background 0.2s; }
-.btn-send:hover { background: var(--verde-dark); }
+.btn-send { width: 100%; padding: 11px; background: var(--verde); color: white; border: none; border-radius: 7px; cursor: pointer; font-size: 0.95em; font-weight: bold; font-family: sans-serif; }
 .btn-send:disabled { background: #ccc; cursor: not-allowed; }
 .modal-success { text-align: center; padding: 20px 0; }
 .modal-success .icon { font-size: 2.5em; margin-bottom: 10px; }
 .modal-success h3 { color: var(--verde-dark); margin-bottom: 8px; font-family: sans-serif; }
 .modal-success p { font-size: 0.88em; font-family: sans-serif; color: #666; }
 .modal-error { background: #fff0f0; color: #c0392b; padding: 8px 10px; border-radius: 6px; font-size: 0.83em; font-family: sans-serif; margin-bottom: 10px; display: none; }
-
+.error-banner { background: #fff0f0; color: #c0392b; padding: 10px 16px; font-family: sans-serif; font-size: 0.85em; text-align: center; display: none; }
 .lang-bar { background: #2d2926; display: flex; justify-content: flex-end; padding: 4px 20px; gap: 8px; }
 .lang-btn { background: none; border: 1px solid #555; color: #aaa; padding: 2px 10px; border-radius: 4px; cursor: pointer; font-size: 0.78em; font-family: sans-serif; }
 .lang-btn.active { border-color: var(--verde); color: var(--verde); }
-
-.error-banner { background: #fff0f0; color: #c0392b; padding: 10px 16px; font-family: sans-serif; font-size: 0.85em; text-align: center; display: none; }
 </style>
 </head>
 <body>
@@ -93,12 +83,10 @@ body { display: flex; flex-direction: column; }
   <button class="lang-btn active" onclick="setLang('fr')">🇫🇷 FR</button>
   <button class="lang-btn" onclick="setLang('es')">🇪🇸 ES</button>
 </div>
-
 <div class="header">
   <h1>🗺️ <span>Intercambios</span> Escolares — La Casa del Profe</h1>
   <span class="badge" id="counter">⏳ Chargement...</span>
 </div>
-
 <div class="filters">
   <input type="text" id="search" placeholder="🔍 Ville, pays, établissement..."/>
   <select id="fType">
@@ -111,7 +99,6 @@ body { display: flex; flex-direction: column; }
   <select id="fPays"><option value="">🌍 Tous pays</option></select>
   <button class="btn-reset" onclick="resetF()">✕ Reset</button>
 </div>
-
 <div class="legend">
   <b>Légende :</b>
   <div class="leg"><div class="dot" style="background:#6F9C10"></div>Correspondance</div>
@@ -119,11 +106,7 @@ body { display: flex; flex-direction: column; }
   <div class="leg"><div class="dot" style="background:#8b5cf6"></div>Erasmus+</div>
   <div class="leg"><div class="dot" style="background:#e05c3a"></div>Autre</div>
 </div>
-
-<div class="error-banner" id="error-banner">
-  ⚠️ Impossible de charger les annonces. Veuillez rafraîchir la page.
-</div>
-
+<div class="error-banner" id="error-banner">⚠️ Impossible de charger les annonces. Veuillez rafraîchir la page.</div>
 <div class="layout">
   <div class="sidebar">
     <div class="sidebar-head" id="sb-head">📋 Chargement...</div>
@@ -131,7 +114,6 @@ body { display: flex; flex-direction: column; }
   </div>
   <div id="map"></div>
 </div>
-
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <button class="modal-close" onclick="fermerModal()">✕</button>
@@ -141,292 +123,241 @@ body { display: flex; flex-direction: column; }
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ============================================================
-// CONFIG
-// ============================================================
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbz-IHPRq0_3Za_kgugFysREu_C2Bu4ga1C4qxTIVlQke3fSdvNA4CSj-hbcn7enrIsrjA/exec";
 
-// ============================================================
-// LANGUE
-// ============================================================
 let LANG = 'fr';
 const T = {
   fr: {
-    btn_contact: "✉️ Contacter cet établissement",
-    contact_title: "Contacter cet établissement",
-    contact_dest: "Votre message sera transmis à",
-    nom: "Votre nom *", etab: "Votre établissement *",
-    pays: "Votre pays *", email: "Votre email *",
-    message: "Votre message *",
-    message_ph: "Présentez votre projet, vos élèves, vos attentes...",
-    rgpd: "Vos coordonnées seront transmises uniquement à l'établissement contacté. Elles ne seront jamais affichées publiquement — conformité RGPD.",
-    check: "J'accepte que mon email soit transmis à l'établissement contacté pour faciliter la mise en relation.",
-    send: "✉️ Envoyer le message", sending: "⏳ Envoi en cours...",
-    success_title: "Message envoyé ! ✅",
-    success_msg: "L'enseignant responsable va recevoir vos coordonnées et vous contactera directement. ¡ Buena suerte !",
-    error_send: "Une erreur s'est produite. Veuillez réessayer.",
-    required: "Veuillez remplir tous les champs et accepter les conditions.",
-    rgpd_note: "🔒 Emails jamais affichés publiquement — RGPD",
+    btn_contact:"✉️ Contacter cet établissement", contact_title:"Contacter cet établissement",
+    contact_dest:"Votre message sera transmis à", nom:"Votre nom *", etab:"Votre établissement *",
+    pays:"Votre pays *", email:"Votre email *", message:"Votre message *",
+    message_ph:"Présentez votre projet, vos élèves, vos attentes...",
+    rgpd:"Vos coordonnées seront transmises uniquement à l'établissement contacté. Elles ne seront jamais affichées publiquement — conformité RGPD.",
+    check:"J'accepte que mon email soit transmis à l'établissement contacté pour faciliter la mise en relation.",
+    send:"✉️ Envoyer le message", sending:"⏳ Envoi en cours...",
+    success_title:"Message envoyé ! ✅", success_msg:"L'enseignant responsable va recevoir vos coordonnées et vous contactera directement. ¡ Buena suerte !",
+    error_send:"Une erreur s'est produite. Veuillez réessayer.", required:"Veuillez remplir tous les champs et accepter les conditions.",
+    rgpd_note:"🔒 Emails jamais affichés publiquement — RGPD",
   },
   es: {
-    btn_contact: "✉️ Contactar este centro",
-    contact_title: "Contactar este centro",
-    contact_dest: "Su mensaje será transmitido a",
-    nom: "Su nombre *", etab: "Su centro *",
-    pays: "Su país *", email: "Su email *",
-    message: "Su mensaje *",
-    message_ph: "Presente su proyecto, sus alumnos, sus expectativas...",
-    rgpd: "Sus datos serán transmitidos únicamente al centro contactado. Nunca se mostrarán públicamente — conformidad RGPD.",
-    check: "Acepto que mi email sea transmitido al centro contactado para facilitar el contacto.",
-    send: "✉️ Enviar mensaje", sending: "⏳ Enviando...",
-    success_title: "¡ Mensaje enviado ! ✅",
-    success_msg: "El profesor responsable recibirá sus datos y le contactará directamente. ¡ Buena suerte !",
-    error_send: "Se produjo un error. Por favor inténtelo de nuevo.",
-    required: "Por favor complete todos los campos y acepte las condiciones.",
-    rgpd_note: "🔒 Emails nunca visibles públicamente — RGPD",
+    btn_contact:"✉️ Contactar este centro", contact_title:"Contactar este centro",
+    contact_dest:"Su mensaje será transmitido a", nom:"Su nombre *", etab:"Su centro *",
+    pays:"Su país *", email:"Su email *", message:"Su mensaje *",
+    message_ph:"Presente su proyecto, sus alumnos, sus expectativas...",
+    rgpd:"Sus datos serán transmitidos únicamente al centro contactado. Nunca se mostrarán públicamente — conformidad RGPD.",
+    check:"Acepto que mi email sea transmitido al centro contactado para facilitar el contacto.",
+    send:"✉️ Enviar mensaje", sending:"⏳ Enviando...",
+    success_title:"¡ Mensaje enviado ! ✅", success_msg:"El profesor responsable recibirá sus datos y le contactará directamente. ¡ Buena suerte !",
+    error_send:"Se produjo un error. Por favor inténtelo de nuevo.", required:"Por favor complete todos los campos y acepte las condiciones.",
+    rgpd_note:"🔒 Emails nunca visibles públicamente — RGPD",
   }
 };
-
 function setLang(l) {
   LANG = l;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
 }
 
-// ============================================================
-// COULEURS / EMOJIS
-// ============================================================
-const COLORS = { correspondance:"#6F9C10", voyage:"#3a7bc8", erasmus:"#8b5cf6", autre:"#e05c3a" };
-const EMOJIS = { correspondance:"✉️", voyage:"✈️", erasmus:"🎓", autre:"📝" };
-const LABELS = { correspondance:"Correspondance", voyage:"Voyage scolaire", erasmus:"Erasmus+", autre:"Autre" };
+const COLORS={correspondance:"#6F9C10",voyage:"#3a7bc8",erasmus:"#8b5cf6",autre:"#e05c3a"};
+const EMOJIS={correspondance:"✉️",voyage:"✈️",erasmus:"🎓",autre:"📝"};
+const LABELS={correspondance:"Correspondance",voyage:"Voyage scolaire",erasmus:"Erasmus+",autre:"Autre"};
 
-// ============================================================
-// CARTE LEAFLET
-// ============================================================
-const map = L.map('map').setView([44, 2], 3);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution:'© OpenStreetMap © CartoDB', subdomains:'abcd', maxZoom:19
+const map=L.map('map').setView([44,2],3);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap © CartoDB',subdomains:'abcd',maxZoom:19
 }).addTo(map);
 
-let DATA = [], markers = {}, activeId = null;
+let DATA=[],markers={},activeId=null;
 
 // ============================================================
-// CHARGEMENT DONNÉES DEPUIS APPS SCRIPT
+// JSONP — contourne le CORS nativement
 // ============================================================
-async function chargerAnnonces() {
-  try {
-    const resp = await fetch(WEBAPP_URL + "?action=getAnnonces");
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    const annonces = await resp.json();
-    // Filtre les annonces sans coordonnées valides
-    DATA = annonces.filter(a => a.lat && a.lng && a.lat !== 0 && a.lng !== 0);
+function chargerAnnonces() {
+  const callbackName = 'jsonpCallback_' + Date.now();
+  const script = document.createElement('script');
+  
+  // Timeout de sécurité
+  const timeout = setTimeout(() => {
+    document.getElementById('error-banner').style.display='block';
+    document.getElementById('sb-list').innerHTML='<div class="empty">❌ Délai dépassé. Rafraîchissez la page.</div>';
+    document.getElementById('counter').textContent='Erreur';
+    document.getElementById('sb-head').textContent='❌ Erreur';
+    delete window[callbackName];
+    document.body.removeChild(script);
+  }, 10000);
+
+  window[callbackName] = function(annonces) {
+    clearTimeout(timeout);
+    delete window[callbackName];
+    document.body.removeChild(script);
+    DATA = annonces.filter(a => a.lat && a.lng && a.lat!==0 && a.lng!==0);
     peuplementFiltresPays();
     afficher(DATA);
-  } catch(err) {
-    console.error("Erreur chargement:", err);
-    document.getElementById('error-banner').style.display = 'block';
-    document.getElementById('sb-list').innerHTML = '<div class="empty">❌ Impossible de charger les annonces.</div>';
-    document.getElementById('counter').textContent = 'Erreur de chargement';
-    document.getElementById('sb-head').textContent = '❌ Erreur';
-  }
+  };
+
+  script.src = WEBAPP_URL + '?action=getAnnonces&callback=' + callbackName;
+  script.onerror = function() {
+    clearTimeout(timeout);
+    document.getElementById('error-banner').style.display='block';
+    document.getElementById('sb-list').innerHTML='<div class="empty">❌ Impossible de charger les annonces.</div>';
+    document.getElementById('counter').textContent='Erreur';
+    document.getElementById('sb-head').textContent='❌ Erreur';
+  };
+  document.body.appendChild(script);
 }
 
-// ============================================================
-// MARQUEURS
-// ============================================================
-function icone(type) {
-  const c = COLORS[type]||COLORS.autre, e = EMOJIS[type]||"📝";
-  return L.divIcon({
-    className:'',
+function icone(type){
+  const c=COLORS[type]||COLORS.autre,e=EMOJIS[type]||"📝";
+  return L.divIcon({className:'',
     html:`<div style="width:32px;height:32px;background:${c};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:13px">${e}</span></div>`,
-    iconSize:[32,32], iconAnchor:[16,32], popupAnchor:[0,-34]
+    iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-34]
   });
 }
 
-function popupHtml(a) {
-  const c = COLORS[a.type]||COLORS.autre;
-  const l = LABELS[a.type]||"Autre";
-  const t = T[LANG];
+function popupHtml(a){
+  const c=COLORS[a.type]||COLORS.autre,l=LABELS[a.type]||"Autre",t=T[LANG];
   return `<div class="lp">
     <div class="lp-etab">${a.etab}</div>
     <div class="lp-ville">📍 ${a.ville}, ${a.pays}</div>
     <span class="lp-tag" style="background:${c}">${EMOJIS[a.type]||"📝"} ${l}</span>
     <div class="lp-grid">
       <span class="lp-lbl">→</span><span class="lp-val">${a.dest||'-'}</span>
-      <span class="lp-lbl">👥</span><span class="lp-val">${a.eleves||'-'} élèves · ${a.age||'-'}</span>
+      <span class="lp-lbl">👥</span><span class="lp-val">${a.eleves||'-'} · ${a.age||'-'}</span>
       <span class="lp-lbl">📚</span><span class="lp-val">${a.langue||'-'}</span>
     </div>
-    ${a.projet ? `<div class="lp-projet">"${a.projet}"</div>` : ''}
-    <div class="lp-rgpd">🔒 ${t.rgpd_note}</div>
+    ${a.projet?`<div class="lp-projet">"${a.projet}"</div>`:''}
+    <div class="lp-rgpd">${t.rgpd_note}</div>
     <button class="btn-contact" onclick="ouvrirContact(${a.id})">${t.btn_contact}</button>
   </div>`;
 }
 
-// ============================================================
-// AFFICHAGE
-// ============================================================
-function afficher(list) {
-  Object.values(markers).forEach(m => map.removeLayer(m));
-  markers = {};
-  const n = list.length;
-  document.getElementById('counter').textContent = `${n} annonce${n>1?'s':''} active${n>1?'s':''}`;
-  document.getElementById('sb-head').textContent = `📋 ${n} annonce${n>1?'s':''}`;
-  const sb = document.getElementById('sb-list');
-  sb.innerHTML = '';
-  if (!n) { sb.innerHTML='<div class="empty">😕 Aucune annonce ne correspond.</div>'; return; }
-  list.forEach(a => {
-    const m = L.marker([a.lat, a.lng], {icon: icone(a.type)}).addTo(map);
-    m.bindPopup(popupHtml(a), {maxWidth:300});
-    m.on('click', () => activer(a.id));
-    markers[a.id] = m;
-    const card = document.createElement('div');
-    card.className = 'card'; card.id = 'c'+a.id;
-    card.innerHTML = `<div class="card-etab">${a.etab}</div><div class="card-ville">📍 ${a.ville}, ${a.pays}</div><div><span class="tag" style="background:${COLORS[a.type]||COLORS.autre}">${EMOJIS[a.type]||"📝"} ${LABELS[a.type]||"Autre"}</span>${a.dest?` <span style="font-size:.74em;color:#999">→ ${a.dest}</span>`:''}</div>`;
-    card.onclick = () => activer(a.id);
+function afficher(list){
+  Object.values(markers).forEach(m=>map.removeLayer(m));
+  markers={};
+  const n=list.length;
+  document.getElementById('counter').textContent=`${n} annonce${n>1?'s':''} active${n>1?'s':''}`;
+  document.getElementById('sb-head').textContent=`📋 ${n} annonce${n>1?'s':''}`;
+  const sb=document.getElementById('sb-list');
+  sb.innerHTML='';
+  if(!n){sb.innerHTML='<div class="empty">😕 Aucune annonce ne correspond.</div>';return;}
+  list.forEach(a=>{
+    const m=L.marker([a.lat,a.lng],{icon:icone(a.type)}).addTo(map);
+    m.bindPopup(popupHtml(a),{maxWidth:300});
+    m.on('click',()=>activer(a.id));
+    markers[a.id]=m;
+    const card=document.createElement('div');
+    card.className='card';card.id='c'+a.id;
+    card.innerHTML=`<div class="card-etab">${a.etab}</div><div class="card-ville">📍 ${a.ville}, ${a.pays}</div><div><span class="tag" style="background:${COLORS[a.type]||COLORS.autre}">${EMOJIS[a.type]||"📝"} ${LABELS[a.type]||"Autre"}</span>${a.dest?` <span style="font-size:.74em;color:#999">→ ${a.dest}</span>`:''}</div>`;
+    card.onclick=()=>activer(a.id);
     sb.appendChild(card);
   });
 }
 
-function activer(id) {
-  if (activeId) { const o=document.getElementById('c'+activeId); if(o) o.classList.remove('active'); }
-  activeId = id;
-  const el = document.getElementById('c'+id);
-  if (el) { el.classList.add('active'); el.scrollIntoView({behavior:'smooth', block:'nearest'}); }
-  if (markers[id]) { map.setView(markers[id].getLatLng(), 7, {animate:true}); markers[id].openPopup(); }
+function activer(id){
+  if(activeId){const o=document.getElementById('c'+activeId);if(o)o.classList.remove('active');}
+  activeId=id;
+  const el=document.getElementById('c'+id);
+  if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  if(markers[id]){map.setView(markers[id].getLatLng(),7,{animate:true});markers[id].openPopup();}
 }
 
-// ============================================================
-// FILTRES
-// ============================================================
-function peuplementFiltresPays() {
-  const pays = [...new Set(DATA.map(a=>a.pays).filter(Boolean))].sort();
-  const sel = document.getElementById('fPays');
-  sel.innerHTML = '<option value="">🌍 Tous pays</option>';
-  pays.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; sel.appendChild(o); });
+function peuplementFiltresPays(){
+  const pays=[...new Set(DATA.map(a=>a.pays).filter(Boolean))].sort();
+  const sel=document.getElementById('fPays');
+  sel.innerHTML='<option value="">🌍 Tous pays</option>';
+  pays.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
 }
 
-function filtrer() {
-  const s = document.getElementById('search').value.toLowerCase();
-  const t = document.getElementById('fType').value;
-  const p = document.getElementById('fPays').value;
-  afficher(DATA.filter(a =>
-    (!s || [a.etab||'', a.ville||'', a.pays||''].some(x => x.toLowerCase().includes(s))) &&
-    (!t || a.type === t) && (!p || a.pays === p)
+function filtrer(){
+  const s=document.getElementById('search').value.toLowerCase();
+  const t=document.getElementById('fType').value;
+  const p=document.getElementById('fPays').value;
+  afficher(DATA.filter(a=>
+    (!s||[a.etab||'',a.ville||'',a.pays||''].some(x=>x.toLowerCase().includes(s)))&&
+    (!t||a.type===t)&&(!p||a.pays===p)
   ));
 }
-
-function resetF() {
+function resetF(){
   document.getElementById('search').value='';
   document.getElementById('fType').value='';
   document.getElementById('fPays').value='';
   afficher(DATA);
 }
+document.getElementById('search').oninput=filtrer;
+document.getElementById('fType').onchange=filtrer;
+document.getElementById('fPays').onchange=filtrer;
 
-document.getElementById('search').oninput = filtrer;
-document.getElementById('fType').onchange = filtrer;
-document.getElementById('fPays').onchange = filtrer;
-
-// ============================================================
-// MODAL CONTACT
-// ============================================================
-let annonceActive = null;
-
-function ouvrirContact(id) {
-  annonceActive = DATA.find(a => a.id === id);
-  if (!annonceActive) return;
-  const t = T[LANG];
-  document.getElementById('modal-body').innerHTML = `
+// MODAL
+let annonceActive=null;
+function ouvrirContact(id){
+  annonceActive=DATA.find(a=>a.id===id);
+  if(!annonceActive)return;
+  const t=T[LANG];
+  document.getElementById('modal-body').innerHTML=`
     <h2>${t.contact_title}</h2>
     <div class="modal-dest">${t.contact_dest} : <strong>${annonceActive.etab}</strong> (${annonceActive.ville}, ${annonceActive.pays})</div>
     <div class="modal-error" id="modal-error"></div>
-    <label>${t.nom}<input type="text" id="c-nom" placeholder="Marie Dupont"/></label>
-    <label>${t.etab}<input type="text" id="c-etab" placeholder="Collège Jean Jaurès"/></label>
-    <label>${t.pays}<input type="text" id="c-pays" placeholder="France"/></label>
-    <label>${t.email}<input type="email" id="c-email" placeholder="m.dupont@college.fr"/></label>
+    <label>${t.nom}<input type="text" id="c-nom"/></label>
+    <label>${t.etab}<input type="text" id="c-etab"/></label>
+    <label>${t.pays}<input type="text" id="c-pays"/></label>
+    <label>${t.email}<input type="email" id="c-email"/></label>
     <label>${t.message}<textarea id="c-msg" placeholder="${t.message_ph}"></textarea></label>
     <div class="modal-rgpd">${t.rgpd}</div>
-    <div class="modal-check">
-      <input type="checkbox" id="c-rgpd"/>
-      <label for="c-rgpd">${t.check}</label>
-    </div>
+    <div class="modal-check"><input type="checkbox" id="c-rgpd"/><label for="c-rgpd">${t.check}</label></div>
     <button class="btn-send" id="btn-send" onclick="envoyerContact()">${t.send}</button>`;
   document.getElementById('modal').classList.add('open');
 }
+function fermerModal(){document.getElementById('modal').classList.remove('open');annonceActive=null;}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)fermerModal();});
 
-function fermerModal() {
-  document.getElementById('modal').classList.remove('open');
-  annonceActive = null;
-}
+async function envoyerContact(){
+  const t=T[LANG];
+  const nom=document.getElementById('c-nom').value.trim();
+  const etab=document.getElementById('c-etab').value.trim();
+  const pays=document.getElementById('c-pays').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const msg=document.getElementById('c-msg').value.trim();
+  const rgpd=document.getElementById('c-rgpd').checked;
+  const errEl=document.getElementById('modal-error');
+  errEl.style.display='none';
+  if(!nom||!etab||!pays||!email||!msg||!rgpd){errEl.textContent=t.required;errEl.style.display='block';return;}
+  const btn=document.getElementById('btn-send');
+  btn.disabled=true;btn.textContent=t.sending;
 
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) fermerModal();
-});
+  // Contact via JSONP aussi
+  const callbackName='contactCallback_'+Date.now();
+  const script=document.createElement('script');
+  const params=new URLSearchParams({
+    action:'contact', callback:callbackName,
+    annonce_id:annonceActive.id, annonce_etab:annonceActive.etab,
+    annonce_ville:annonceActive.ville, annonce_pays:annonceActive.pays,
+    annonce_type:annonceActive.type,
+    expediteur_nom:nom, expediteur_etab:etab,
+    expediteur_pays:pays, expediteur_email:email,
+    message:msg, langue:LANG
+  });
 
-async function envoyerContact() {
-  const t = T[LANG];
-  const nom   = document.getElementById('c-nom').value.trim();
-  const etab  = document.getElementById('c-etab').value.trim();
-  const pays  = document.getElementById('c-pays').value.trim();
-  const email = document.getElementById('c-email').value.trim();
-  const msg   = document.getElementById('c-msg').value.trim();
-  const rgpd  = document.getElementById('c-rgpd').checked;
-  const errEl = document.getElementById('modal-error');
-  errEl.style.display = 'none';
+  const timeout=setTimeout(()=>{
+    errEl.textContent=t.error_send+' (timeout)';errEl.style.display='block';
+    btn.disabled=false;btn.textContent=t.send;
+    delete window[callbackName];document.body.removeChild(script);
+  },10000);
 
-  if (!nom || !etab || !pays || !email || !msg || !rgpd) {
-    errEl.textContent = t.required;
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const btn = document.getElementById('btn-send');
-  btn.disabled = true;
-  btn.textContent = t.sending;
-
-  try {
-    const payload = {
-      action: "contact",
-      annonce_id: annonceActive.id,
-      annonce_etab: annonceActive.etab,
-      annonce_ville: annonceActive.ville,
-      annonce_pays: annonceActive.pays,
-      annonce_type: annonceActive.type,
-      expediteur_nom: nom,
-      expediteur_etab: etab,
-      expediteur_pays: pays,
-      expediteur_email: email,
-      message: msg,
-      langue: LANG
-    };
-
-    const resp = await fetch(WEBAPP_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    const result = await resp.json();
-
-    if (result.success) {
-      document.getElementById('modal-body').innerHTML = `
-        <div class="modal-success">
-          <div class="icon">✅</div>
-          <h3>${t.success_title}</h3>
-          <p>${t.success_msg}</p>
-        </div>`;
-      setTimeout(fermerModal, 4000);
+  window[callbackName]=function(result){
+    clearTimeout(timeout);delete window[callbackName];document.body.removeChild(script);
+    if(result.success){
+      document.getElementById('modal-body').innerHTML=`
+        <div class="modal-success"><div class="icon">✅</div><h3>${t.success_title}</h3><p>${t.success_msg}</p></div>`;
+      setTimeout(fermerModal,4000);
     } else {
-      throw new Error(result.error || 'Erreur serveur');
+      errEl.textContent=t.error_send;errEl.style.display='block';
+      btn.disabled=false;btn.textContent=t.send;
     }
-  } catch(err) {
-    errEl.textContent = t.error_send + ' (' + err.message + ')';
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = t.send;
-  }
+  };
+  script.src=WEBAPP_URL+'?'+params.toString();
+  document.body.appendChild(script);
 }
 
-// ============================================================
-// INIT — Chargement des vraies données
-// ============================================================
 chargerAnnonces();
 </script>
 </body>
