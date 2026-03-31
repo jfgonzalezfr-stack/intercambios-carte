@@ -213,19 +213,32 @@ function icone(type){
     iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-34]
   });
 }
+function badgeDate(dateStr){
+  if(!dateStr) return '';
+  const parts = dateStr.split('/');
+  const d = new Date(parts[2], parts[1]-1, parts[0]);
+  const diff = (new Date() - d) / (1000*60*60*24);
 
+  if(diff < 30) return "🔥 Nouveau";
+  if(diff < 90) return "🟢 Récent";
+  return "";
+}
 function popupHtml(a){
-  const c=COLORS[a.type]||COLORS.autre,l=LABELS[a.type]||"Autre",t=T[LANG];
+  const c=COLORS[a.type]||COLORS.autre,
+        l=LABELS[a.type]||"Autre",
+        t=T[LANG];
+
   return `<div class="lp">
     <div class="lp-etab">${a.etab}</div>
     <div class="lp-ville">📍 ${a.ville}, ${a.pays}</div>
     <span class="lp-tag" style="background:${c}">${EMOJIS[a.type]||"📝"} ${l}</span>
-  <div class="lp-grid">
-  <span class="lp-lbl">→</span><span class="lp-val">${a.dest||'-'}</span>
-  <span class="lp-lbl">👥</span><span class="lp-val">${a.eleves||'-'} · ${a.age||'-'}</span>
-  <span class="lp-lbl">📚</span><span class="lp-val">${a.langue||'-'}</span>
-  <span class="lp-lbl">📅</span><span class="lp-val">${a.datePublication||'-'}</span>
-</div>
+    ${badgeDate(a.datePublication) ? `<div style="margin:6px 0;font-size:.78em;color:#6f9c10;font-weight:bold;">${badgeDate(a.datePublication)}</div>` : ''}
+    <div class="lp-grid">
+      <span class="lp-lbl">→</span><span class="lp-val">${a.dest||'-'}</span>
+      <span class="lp-lbl">👥</span><span class="lp-val">${a.eleves||'-'} · ${a.age||'-'}</span>
+      <span class="lp-lbl">📚</span><span class="lp-val">${a.langue||'-'}</span>
+      <span class="lp-lbl">📅</span><span class="lp-val">${a.datePublication||'-'}</span>
+    </div>
     ${a.projet?`<div class="lp-projet">"${a.projet}"</div>`:''}
     <div class="lp-rgpd">${t.rgpd_note}</div>
     <button class="btn-contact" onclick="ouvrirContact(${a.id})">${t.btn_contact}</button>
