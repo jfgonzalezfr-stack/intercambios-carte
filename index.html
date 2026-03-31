@@ -220,11 +220,12 @@ function popupHtml(a){
     <div class="lp-etab">${a.etab}</div>
     <div class="lp-ville">📍 ${a.ville}, ${a.pays}</div>
     <span class="lp-tag" style="background:${c}">${EMOJIS[a.type]||"📝"} ${l}</span>
-    <div class="lp-grid">
-      <span class="lp-lbl">→</span><span class="lp-val">${a.dest||'-'}</span>
-      <span class="lp-lbl">👥</span><span class="lp-val">${a.eleves||'-'} · ${a.age||'-'}</span>
-      <span class="lp-lbl">📚</span><span class="lp-val">${a.langue||'-'}</span>
-    </div>
+  <div class="lp-grid">
+  <span class="lp-lbl">→</span><span class="lp-val">${a.dest||'-'}</span>
+  <span class="lp-lbl">👥</span><span class="lp-val">${a.eleves||'-'} · ${a.age||'-'}</span>
+  <span class="lp-lbl">📚</span><span class="lp-val">${a.langue||'-'}</span>
+  <span class="lp-lbl">📅</span><span class="lp-val">${a.datePublication||'-'}</span>
+</div>
     ${a.projet?`<div class="lp-projet">"${a.projet}"</div>`:''}
     <div class="lp-rgpd">${t.rgpd_note}</div>
     <button class="btn-contact" onclick="ouvrirContact(${a.id})">${t.btn_contact}</button>
@@ -247,7 +248,16 @@ function afficher(list){
     markers[a.id]=m;
     const card=document.createElement('div');
     card.className='card';card.id='c'+a.id;
-    card.innerHTML=`<div class="card-etab">${a.etab}</div><div class="card-ville">📍 ${a.ville}, ${a.pays}</div><div><span class="tag" style="background:${COLORS[a.type]||COLORS.autre}">${EMOJIS[a.type]||"📝"} ${LABELS[a.type]||"Autre"}</span>${a.dest?` <span style="font-size:.74em;color:#999">→ ${a.dest}</span>`:''}</div>`;
+card.innerHTML=`
+  <div class="card-etab">${a.etab}</div>
+  <div class="card-ville">📍 ${a.ville}, ${a.pays}</div>
+  <div style="font-size:.74em;color:#999;margin-bottom:4px;">📅 ${a.datePublication||'-'}</div>
+  <div>
+    <span class="tag" style="background:${COLORS[a.type]||COLORS.autre}">
+      ${EMOJIS[a.type]||"📝"} ${LABELS[a.type]||"Autre"}
+    </span>
+    ${a.dest?` <span style="font-size:.74em;color:#999">→ ${a.dest}</span>`:''}
+  </div>`;
     card.onclick=()=>activer(a.id);
     sb.appendChild(card);
   });
