@@ -35,6 +35,20 @@ body { display: flex; flex-direction: column; }
 .card.active { background: var(--verde-light); border-left: 3px solid var(--verde); }
 .card-etab { font-weight: bold; font-size: 0.9em; margin-bottom: 2px; }
 .card-ville { font-size: 0.8em; color: #888; margin-bottom: 5px; font-family: sans-serif; }
+.card-badge {
+  font-size: 0.74em;
+  color: var(--verde);
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-family: sans-serif;
+}
+
+.card-date {
+  font-size: 0.74em;
+  color: #999;
+  margin-bottom: 5px;
+  font-family: sans-serif;
+}  
 .tag { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 0.72em; font-weight: bold; color: white; font-family: sans-serif; }
 .empty { padding: 25px 14px; text-align: center; color: #aaa; font-size: 0.88em; font-family: sans-serif; }
 .loading { padding: 30px 14px; text-align: center; color: #888; font-family: sans-serif; font-size: 0.9em; }
@@ -223,6 +237,7 @@ function badgeDate(dateStr){
   if(diff < 90) return "🟢 Récent";
   return "";
 }
+  
 function popupHtml(a){
   const c=COLORS[a.type]||COLORS.autre,
         l=LABELS[a.type]||"Autre",
@@ -246,6 +261,15 @@ function popupHtml(a){
 }
 
 function afficher(list){
+     list.sort((a,b)=>{
+    if(!a.datePublication && !b.datePublication) return 0;
+    if(!a.datePublication) return 1;
+    if(!b.datePublication) return -1;
+
+    const da = new Date(a.datePublication.split('/').reverse().join('-'));
+    const db = new Date(b.datePublication.split('/').reverse().join('-'));
+    return db - da;
+  });
   Object.values(markers).forEach(m=>map.removeLayer(m));
   markers={};
   const n=list.length;
@@ -264,12 +288,13 @@ function afficher(list){
 card.innerHTML=`
   <div class="card-etab">${a.etab}</div>
   <div class="card-ville">📍 ${a.ville}, ${a.pays}</div>
-  <div style="font-size:.74em;color:#999;margin-bottom:4px;">📅 ${a.datePublication||'-'}</div>
+  ${badgeDate(a.datePublication) ? `<div class="card-badge">${badgeDate(a.datePublication)}</div>` : ''}
+  <div class="card-date">📅 ${a.datePublication||'-'}</div>
   <div>
     <span class="tag" style="background:${COLORS[a.type]||COLORS.autre}">
       ${EMOJIS[a.type]||"📝"} ${LABELS[a.type]||"Autre"}
     </span>
-    ${a.dest?` <span style="font-size:.74em;color:#999">→ ${a.dest}</span>`:''}
+    ${a.dest ? ` <span style="font-size:.74em;color:#999">→ ${a.dest}</span>` : ''}
   </div>`;
     card.onclick=()=>activer(a.id);
     sb.appendChild(card);
