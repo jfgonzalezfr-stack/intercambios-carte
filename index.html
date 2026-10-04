@@ -113,12 +113,12 @@
           href="https://docs.google.com/forms/d/e/1FAIpQLSc2-LqLr9Aj3VNs3-7k2CalyZHeWD9sLXp2cOYYEDLXh_wwAg/viewform?pli=1" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl transition shadow-xs whitespace-nowrap cursor-pointer shrink-0"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition hover:scale-105 active:scale-95 whitespace-nowrap cursor-pointer shrink-0"
+          style="display: flex !important; visibility: visible !important;"
           title="Proposer une annonce"
         >
-          <i data-lucide="plus" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span class="hidden min-[420px]:inline">Proposer une annonce</span>
-          <span class="min-[420px]:hidden">Proposer</span>
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>Proposer une annonce</span>
         </a>
       </div>
     </div>
@@ -127,6 +127,19 @@
   <!-- Map Container -->
   <main class="flex-1 relative">
     <div id="map"></div>
+
+    <!-- Floating Propose Button directly on the map (always visible in iframe and fullscreen) -->
+    <a 
+      href="https://docs.google.com/forms/d/e/1FAIpQLSc2-LqLr9Aj3VNs3-7k2CalyZHeWD9sLXp2cOYYEDLXh_wwAg/viewform?pli=1" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      class="absolute top-4 right-4 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl shadow-lg border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition hover:scale-105 active:scale-95 cursor-pointer"
+      style="z-index: 800 !important; display: flex !important; visibility: visible !important;"
+      title="Proposer un nouvel établissement / projet"
+    >
+      <i data-lucide="plus-circle" class="w-4 h-4"></i>
+      <span>Proposer une annonce</span>
+    </a>
 
     <!-- Floating Legend / Info -->
     <div class="absolute bottom-4 left-4 z-400 bg-white/95 backdrop-blur-xs px-3 py-2 rounded-xl shadow-md border border-zinc-200 text-[11px] text-zinc-600 hidden sm:flex items-center gap-3">
