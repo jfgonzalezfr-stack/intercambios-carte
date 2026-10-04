@@ -87,14 +87,25 @@
 
         <select 
           id="typeFilter" 
-          class="px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+          class="px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer font-medium"
         >
-          <option value="Tous">Tous les types</option>
-          <option value="Échange">Échange scolaire</option>
-          <option value="Erasmus">Erasmus+</option>
-          <option value="Correspondance">Correspondance</option>
-          <option value="Voyage">Voyage / Séjour</option>
+          <option value="Tous">Tous les types d'échanges</option>
+          <option value="courrier">✉️ Correspondance / Courrier (1000+)</option>
+          <option value="echange">🤝 Échange scolaire (1600+)</option>
+          <option value="voyage">🚌 Voyage / Séjour (1100+)</option>
+          <option value="appariement">🏫 Appariement (400)</option>
+          <option value="etwinning">💻 Projet eTwinning (290+)</option>
+          <option value="erasmus">🇪🇺 Erasmus+ (160+)</option>
         </select>
+
+        <button 
+          id="fullscreenBtn" 
+          title="Afficher en plein écran"
+          class="p-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-xl text-xs flex items-center gap-1 transition cursor-pointer"
+        >
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+          <span class="hidden sm:inline font-medium">Plein écran</span>
+        </button>
 
         <a 
           href="https://docs.google.com/forms/d/e/1FAIpQLSc2-LqLr9Aj3VNs3-7k2CalyZHeWD9sLXp2cOYYEDLXh_wwAg/viewform?pli=1" 
@@ -124,9 +135,9 @@
     </div>
   </main>
 
-  <!-- Modal Detail Popin -->
-  <div id="projectModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+  <!-- Modal Detail Popin (Always in absolute forefront above Leaflet tiles/markers/fullscreen) -->
+  <div id="projectModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden" style="z-index: 999999 !important;">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in relative" style="z-index: 1000000 !important;">
       <div class="flex items-start justify-between">
         <div>
           <span id="modalType" class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold uppercase rounded-md border border-emerald-200">
@@ -341,6 +352,11 @@
     modal.onclick = (e) => {
       if (e.target === modal) modal.classList.add('hidden');
     };
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+      }
+    });
 
     function openProjectModal(p) {
       document.getElementById('modalSchool').textContent = p.schoolName || 'Établissement';
@@ -363,6 +379,13 @@
         emailBtn.style.display = 'none';
       }
 
+      // En mode plein écran, le navigateur masque les éléments hors du conteneur plein écran.
+      // On déplace donc la modale dans le conteneur plein écran actif avec le z-index le plus élevé.
+      const targetContainer = document.fullscreenElement || document.body;
+      if (modal.parentElement !== targetContainer) {
+        targetContainer.appendChild(modal);
+      }
+      modal.style.zIndex = '999999';
       modal.classList.remove('hidden');
       lucide.createIcons();
     }
@@ -388,12 +411,25 @@
       document.getElementById('counter').textContent = `${projectsToDisplay.length} établissements`;
     }
 
+    function matchesCategory(projectType, filter) {
+      if (!filter || filter === 'Tous') return true;
+      if (!projectType) return false;
+      const pt = projectType.toLowerCase();
+      if (filter === 'courrier') return pt.includes('courrier') || pt.includes('correspondance') || pt.includes('lettre') || pt.includes('couriier') || pt.includes('mail');
+      if (filter === 'echange') return pt.includes('echange') || pt.includes('échange') || pt.includes('intercambio');
+      if (filter === 'voyage') return pt.includes('voyage') || pt.includes('séjour') || pt.includes('sejour');
+      if (filter === 'erasmus') return pt.includes('erasmus');
+      if (filter === 'etwinning') return pt.includes('etwinning');
+      if (filter === 'appariement') return pt.includes('appariement');
+      return pt.includes(filter.toLowerCase());
+    }
+
     function applyFilters() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const type = document.getElementById('typeFilter').value;
 
       const filtered = allProjects.filter(p => {
-        const matchesType = type === 'Tous' || (p.projectType && p.projectType.toLowerCase().includes(type.toLowerCase()));
+        const matchesType = matchesCategory(p.projectType, type);
         const matchesQuery = !query || 
           (p.schoolName && p.schoolName.toLowerCase().includes(query)) ||
           (p.schoolCity && p.schoolCity.toLowerCase().includes(query)) ||
@@ -406,6 +442,25 @@
       });
 
       renderMarkers(filtered);
+    }
+
+    // Gestion du mode Plein Écran
+    const fsBtn = document.getElementById('fullscreenBtn');
+    if (fsBtn) {
+      fsBtn.onclick = () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      };
+      document.addEventListener('fullscreenchange', () => {
+        const isFs = !!document.fullscreenElement;
+        fsBtn.innerHTML = isFs 
+          ? `<i data-lucide="minimize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Réduire</span>` 
+          : `<i data-lucide="maximize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Plein écran</span>`;
+        lucide.createIcons();
+      });
     }
 
     document.getElementById('searchInput').addEventListener('input', applyFilters);
