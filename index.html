@@ -1,1 +1,434 @@
-<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Avertissement de redirection</title><style>body,div,a{font-family:Roboto,sans-serif}body{background-color:var(--xhUGwc);margin-top:3px}div{color:var(--YLNNHc)}a:link{color:#681da8}a:visited{color:#681da8}a:active{color:#ea4335}div.mymGo{border-top:1px solid var(--gS5jXb);border-bottom:1px solid var(--gS5jXb);background:var(--aYn2S);margin-top:1em;width:100%}div.aXgaGb{padding:0.5em 0;margin-left:10px}div.fTk7vd{margin-left:35px;margin-top:35px}</style></head><body><div class="mymGo"><div class="aXgaGb"><font style="font-size:larger"><b>Avertissement de redirection</b></font></div></div><div class="fTk7vd">&nbsp;La page que vous consultiez essaie de vous rediriger vers une url non valide (/api/download/github-index).<br><br>&nbsp;Si vous ne souhaitez pas consulter cette page, vous pouvez <a href="#" id="tsuid_QBPCaqbiBaDU7M8PhornyQ4_1">revenir à la page précédente</a>.<script nonce="MgILYe0adZYB6TtC0RekQQ">(function(){var id='tsuid_QBPCaqbiBaDU7M8PhornyQ4_1';(function(){document.getElementById(id).onclick=function(){window.history.back();return!1};}).call(this);})();(function(){var id='tsuid_QBPCaqbiBaDU7M8PhornyQ4_1';var ct='originlink';var oi='unauthorizedredirect';(function(){document.getElementById(id).onmousedown=function(){var b=document&&document.referrer,a="encodeURIComponent"in window?encodeURIComponent:escape,c="";b&&(c=a(b));(new Image).src="/url?sa=T&url="+c+"&oi="+a(oi)+"&ct="+a(ct);return!1};}).call(this);})();</script><br><br><br></div></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte Interactive des Échanges Scolaires • La Casa del Profe</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Leaflet MarkerCluster CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+      background: #f8fafc;
+    }
+    .custom-cluster-icon {
+      background-color: #059669;
+      color: white;
+      border-radius: 9999px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+      transition: transform 0.2s ease;
+    }
+    .custom-cluster-icon:hover {
+      transform: scale(1.1);
+    }
+  </style>
+<script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
+<body class="bg-zinc-50 flex flex-col h-screen overflow-hidden">
+
+  <!-- Top Controls Bar -->
+  <header class="bg-white border-b border-zinc-200 px-4 py-2.5 z-10 shrink-0 shadow-xs">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
+      
+      <!-- Title & Live Counter -->
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+            <i data-lucide="globe" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-zinc-900 leading-tight">Intercambios Escolares</h1>
+            <p class="text-[11px] text-zinc-500 font-medium">lacasadelprofe.fr</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="counter">Chargement...</span>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative flex-1 sm:w-64">
+          <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Rechercher une ville, établissement..." 
+            class="w-full pl-9 pr-3 py-1.5 bg-zinc-50 hover:bg-zinc-100/80 focus:bg-white border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 transition"
+          />
+        </div>
+
+        <select 
+          id="typeFilter" 
+          class="px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+        >
+          <option value="Tous">Tous les types</option>
+          <option value="Échange">Échange scolaire</option>
+          <option value="Erasmus">Erasmus+</option>
+          <option value="Correspondance">Correspondance</option>
+          <option value="Voyage">Voyage / Séjour</option>
+        </select>
+
+        <a 
+          href="https://docs.google.com/forms/d/e/1FAIpQLSc2-LqLr9Aj3VNs3-7k2CalyZHeWD9sLXp2cOYYEDLXh_wwAg/viewform?pli=1" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl transition shadow-xs whitespace-nowrap"
+        >
+          <i data-lucide="plus" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Proposer une annonce</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Map Container -->
+  <main class="flex-1 relative">
+    <div id="map"></div>
+
+    <!-- Floating Legend / Info -->
+    <div class="absolute bottom-4 left-4 z-400 bg-white/95 backdrop-blur-xs px-3 py-2 rounded-xl shadow-md border border-zinc-200 text-[11px] text-zinc-600 hidden sm:flex items-center gap-3">
+      <span class="flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span>
+        Établissement vérifié
+      </span>
+      <span class="text-zinc-300">•</span>
+      <span>Cliquez sur un marqueur pour afficher la fiche complète</span>
+    </div>
+  </main>
+
+  <!-- Modal Detail Popin -->
+  <div id="projectModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <span id="modalType" class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold uppercase rounded-md border border-emerald-200">
+            Échange
+          </span>
+          <h2 id="modalSchool" class="text-lg font-bold text-zinc-900 mt-2">Nom de l'établissement</h2>
+          <p id="modalLocation" class="text-xs text-zinc-500 font-medium flex items-center gap-1 mt-0.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-zinc-400"></i>
+            <span>Ville, Pays</span>
+          </p>
+        </div>
+        <button id="closeModal" class="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs bg-zinc-50 p-3.5 rounded-xl border border-zinc-200/70">
+        <div>
+          <strong class="text-zinc-700 block">Disciplines :</strong>
+          <span id="modalSubjects" class="text-zinc-600">-</span>
+        </div>
+        <div>
+          <strong class="text-zinc-700 block">Niveaux :</strong>
+          <span id="modalGrades" class="text-zinc-600">-</span>
+        </div>
+        <div class="col-span-2 pt-2 border-t border-zinc-200/60">
+          <strong class="text-zinc-700 block">Destination & Période souhaitées :</strong>
+          <span id="modalDestination" class="text-zinc-600">-</span>
+        </div>
+      </div>
+
+      <div>
+        <strong class="text-xs font-bold text-zinc-800 block mb-1">Description du projet :</strong>
+        <p id="modalDescription" class="text-xs text-zinc-600 leading-relaxed bg-zinc-50/50 p-3 rounded-xl border border-zinc-100">
+          -
+        </p>
+      </div>
+
+      <!-- Contact Block -->
+      <div class="pt-2 border-t border-zinc-200 flex items-center justify-between">
+        <div>
+          <span id="modalContact" class="text-xs font-bold text-zinc-900 block">-</span>
+          <span id="modalFunction" class="text-[11px] text-zinc-500">-</span>
+        </div>
+        <a 
+          id="modalEmailBtn"
+          href="#" 
+          class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs"
+        >
+          <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+          <span>Contacter</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // CONFIGURATION GOOGLE SHEET (Optionnel mais recommandé pour le temps réel)
+    // Collez ici le lien de partage ou d'export CSV de votre Google Sheet
+    // Exemple : "https://docs.google.com/spreadsheets/d/VOTRE_ID_DE_SHEET/gviz/tq?tqx=out:csv"
+    // =========================================================================
+    let GOOGLE_SHEET_CSV_URL = ""; 
+
+    // Initialisation de la carte Leaflet
+    const map = L.map('map', {
+      center: [46.2276, 2.2137], // Centré sur l'Europe
+      zoom: 6,
+      zoomControl: true,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> • La Casa del Profe'
+    }).addTo(map);
+
+    // Groupe de regroupement de marqueurs fluide pour 2 240+ points
+    const clusterGroup = L.markerClusterGroup({
+      chunkedLoading: true,
+      maxClusterRadius: 40,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      iconCreateFunction: function(cluster) {
+        const count = cluster.getChildCount();
+        let size = count < 20 ? 34 : (count < 100 ? 42 : 50);
+        return L.divIcon({
+          html: `<span>${count}</span>`,
+          className: 'custom-cluster-icon',
+          iconSize: L.point(size, size)
+        });
+      }
+    });
+
+    map.addLayer(clusterGroup);
+
+    let allProjects = [];
+
+    // Parseur CSV rapide
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+      
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v ? v.replace(/^"|"$/g, '').replace(/""/g, '"').trim() : '');
+        rows.push(row);
+      }
+      return { headers, rows };
+    }
+
+    // Geocodage léger avec cache localStorage
+    async function geocodeCity(city, country) {
+      const cacheKey = `geo_${city}_${country}`.toLowerCase().replace(/\s+/g, '_');
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return JSON.parse(cached);
+
+      try {
+        const q = encodeURIComponent(`${city}, ${country || 'France'}`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+            localStorage.setItem(cacheKey, JSON.stringify(coords));
+            return coords;
+          }
+        }
+      } catch (e) {
+        console.warn("Geocoding failed for", city);
+      }
+      return null;
+    }
+
+    // Synchronisation en direct avec la Google Sheet
+    async function loadGoogleSheetUpdates() {
+      if (!GOOGLE_SHEET_CSV_URL) return;
+      try {
+        let url = GOOGLE_SHEET_CSV_URL;
+        if (url.includes('/edit')) {
+          url = url.replace(/\/edit.*$/, '/gviz/tq?tqx=out:csv');
+        }
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const text = await res.text();
+        const { headers, rows } = parseCSV(text);
+
+        // Trouve les colonnes
+        const colSchool = headers.findIndex(h => h.includes("etablissement") || h.includes("ecole") || h.includes("nom"));
+        const colCity = headers.findIndex(h => h.includes("ville") || h.includes("ciudad"));
+        const colCountry = headers.findIndex(h => h.includes("pays"));
+        const colType = headers.findIndex(h => h.includes("type"));
+        const colSubjects = headers.findIndex(h => h.includes("matiere") || h.includes("discipline") || h.includes("langue"));
+        const colEmail = headers.findIndex(h => h.includes("email") || h.includes("mail"));
+        const colContact = headers.findIndex(h => h.includes("prenom") || h.includes("contact"));
+        const colDesc = headers.findIndex(h => h.includes("description") || h.includes("projet"));
+
+        for (const row of rows) {
+          const schoolName = row[colSchool] || "Établissement";
+          const city = row[colCity] || "";
+          const country = row[colCountry] || "France";
+
+          // Vérifie si déjà présent dans l'historique
+          const exists = allProjects.some(p => p.schoolName && p.schoolName.toLowerCase() === schoolName.toLowerCase() && p.schoolCity && p.schoolCity.toLowerCase() === city.toLowerCase());
+          if (!exists && city) {
+            const coords = await geocodeCity(city, country);
+            if (coords) {
+              const newProj = {
+                schoolName,
+                schoolCity: city,
+                schoolCountry: country,
+                projectType: row[colType] || "Échange",
+                subjects: row[colSubjects] || "Espagnol",
+                gradeLevels: "Tous niveaux",
+                destination: "Espagne",
+                period: "En cours",
+                description: row[colDesc] || "Nouvelle annonce reçue",
+                contactFirstName: row[colContact] || "",
+                contactLastName: "",
+                contactEmail: row[colEmail] || "",
+                latitude: coords.lat,
+                longitude: coords.lng,
+              };
+              allProjects.push(newProj);
+            }
+          }
+        }
+        applyFilters();
+      } catch (err) {
+        console.error("Live Sheet sync error:", err);
+      }
+    }
+
+    // Icône personnalisée de repère
+    function createCustomMarkerIcon(projectType) {
+      return L.divIcon({
+        className: 'custom-single-marker',
+        html: `
+          <div style="background-color:#059669;width:24px;height:24px;border-radius:50%;border:2px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <div style="width:8px;height:8px;border-radius:50%;background-color:white;"></div>
+          </div>
+        `,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+    }
+
+    // Modal Details Logic
+    const modal = document.getElementById('projectModal');
+    const closeModal = document.getElementById('closeModal');
+    closeModal.onclick = () => modal.classList.add('hidden');
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+    };
+
+    function openProjectModal(p) {
+      document.getElementById('modalSchool').textContent = p.schoolName || 'Établissement';
+      document.getElementById('modalLocation').textContent = `${p.schoolCity || ''}, ${p.schoolCountry || ''}`;
+      document.getElementById('modalType').textContent = p.projectType || 'Échange';
+      document.getElementById('modalSubjects').textContent = p.subjects || 'Non précisé';
+      document.getElementById('modalGrades').textContent = p.gradeLevels || 'Non précisé';
+      document.getElementById('modalDestination').textContent = `${p.destination || 'Non précisée'} • ${p.period || 'Non précisée'}`;
+      document.getElementById('modalDescription').textContent = p.description || p.searchDetails || 'Aucune description détaillée.';
+      
+      const contactName = `${p.contactFirstName || ''} ${p.contactLastName || ''}`.trim() || 'Enseignant';
+      document.getElementById('modalContact').textContent = contactName;
+      document.getElementById('modalFunction').textContent = p.contactFunction || 'Enseignant référent';
+
+      const emailBtn = document.getElementById('modalEmailBtn');
+      if (p.contactEmail) {
+        emailBtn.href = `mailto:${p.contactEmail}?subject=Contact échange scolaire via lacasadelprofe.fr (${encodeURIComponent(p.schoolName || '')})`;
+        emailBtn.style.display = 'inline-flex';
+      } else {
+        emailBtn.style.display = 'none';
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function renderMarkers(projectsToDisplay) {
+      clusterGroup.clearLayers();
+      const markers = [];
+
+      for (const p of projectsToDisplay) {
+        if (!p.latitude || !p.longitude) continue;
+        const marker = L.marker([p.latitude, p.longitude], {
+          icon: createCustomMarkerIcon(p.projectType)
+        });
+
+        marker.on('click', () => {
+          openProjectModal(p);
+        });
+
+        markers.push(marker);
+      }
+
+      clusterGroup.addLayers(markers);
+      document.getElementById('counter').textContent = `${projectsToDisplay.length} établissements`;
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const type = document.getElementById('typeFilter').value;
+
+      const filtered = allProjects.filter(p => {
+        const matchesType = type === 'Tous' || (p.projectType && p.projectType.toLowerCase().includes(type.toLowerCase()));
+        const matchesQuery = !query || 
+          (p.schoolName && p.schoolName.toLowerCase().includes(query)) ||
+          (p.schoolCity && p.schoolCity.toLowerCase().includes(query)) ||
+          (p.schoolCountry && p.schoolCountry.toLowerCase().includes(query)) ||
+          (p.subjects && p.subjects.toLowerCase().includes(query)) ||
+          (p.destination && p.destination.toLowerCase().includes(query)) ||
+          (p.description && p.description.toLowerCase().includes(query));
+
+        return matchesType && matchesQuery;
+      });
+
+      renderMarkers(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('typeFilter').addEventListener('change', applyFilters);
+
+    // Chargement des 2 240 projets historiques depuis projects.json
+    fetch('projects.json')
+      .then(res => {
+        if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        allProjects = data;
+        renderMarkers(allProjects);
+        lucide.createIcons();
+        loadGoogleSheetUpdates();
+      })
+      .catch(err => {
+        console.error('Erreur chargement projects.json:', err);
+        document.getElementById('counter').textContent = 'Erreur chargement';
+      });
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
