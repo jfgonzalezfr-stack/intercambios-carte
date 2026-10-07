@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Interactive des Échanges Scolaires • La Casa del Profe</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Carte Interactive • Intercambios Escolares</title>
+  <meta name="description" content="Carte interactive des projets d'échanges scolaires, voyages et correspondances entre établissements scolaires de France et d'Espagne.">
 
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-  <!-- Leaflet CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Leaflet CSS & JS (Gratuit, Open-Source, OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <!-- Leaflet MarkerCluster CSS & JS -->
+  <!-- Leaflet.markercluster CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
@@ -25,53 +26,73 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     #map {
       width: 100%;
       height: 100%;
-      background: #f8fafc;
+      background: #e5e7eb;
     }
+    /* Cluster styling */
     .custom-cluster-icon {
-      background-color: #059669;
+      background: rgba(16, 185, 129, 0.9);
+      border: 3px solid white;
       color: white;
-      border-radius: 9999px;
-      font-weight: 700;
+      font-weight: 800;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 3px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+      font-size: 13px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
       transition: transform 0.2s ease;
     }
     .custom-cluster-icon:hover {
       transform: scale(1.1);
+      background: rgba(5, 150, 105, 1);
+    }
+    /* Pin styling */
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+      padding: 4px;
     }
   </style>
-<script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
+<script src="/_aistudio-iframe.js?v=6634132a"></script></head>
 <body class="bg-zinc-50 flex flex-col h-screen overflow-hidden">
 
   <!-- Top Controls Bar -->
   <header class="bg-white border-b border-zinc-200 px-3 sm:px-4 py-2 sm:py-2.5 z-10 shrink-0 shadow-xs">
-    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 max-w-7xl mx-auto">
+    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 max-w-7xl mx-auto">
       
       <!-- Top Row on small screens / Left side on large screens -->
       <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 min-w-0">
           <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs shrink-0">
             <i data-lucide="globe" class="w-4 h-4"></i>
           </div>
-          <div>
-            <h1 class="text-sm font-bold text-zinc-900 leading-tight">Intercambios Escolares</h1>
-            <p class="text-[11px] text-zinc-500 font-medium">lacasadelprofe.fr</p>
+          <div class="min-w-0">
+            <h1 class="text-sm font-bold text-zinc-900 leading-tight truncate">Intercambios Escolares</h1>
+            <p class="text-[11px] text-zinc-500 font-medium truncate">lacasadelprofe.fr</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200 text-xs font-semibold">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div id="counterBadge" class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200 text-xs font-semibold">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span id="counter">Chargement...</span>
           </div>
+
+          <!-- Google Sheet Live Sync Button -->
+          <button 
+            id="openSheetModal" 
+            title="Synchroniser / Configurer Google Sheet en direct"
+            class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 font-medium"
+          >
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span class="hidden sm:inline">Synchro Sheet</span>
+          </button>
 
           <button 
             id="fullscreenBtn" 
@@ -84,41 +105,60 @@
         </div>
       </div>
 
-      <!-- Controls Row: Search, Type Filter & Propose Button (ALWAYS VISIBLE in iframe and fullscreen) -->
-      <div class="flex items-center gap-2 w-full lg:w-auto">
-        <div class="relative flex-1 min-w-[120px] lg:w-56">
+      <!-- Controls Row: Search, Type Filter, Sort Dropdown & Propose Button -->
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full lg:w-auto">
+        <!-- Search Input -->
+        <div class="relative flex-1 min-w-[120px] lg:w-48">
           <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
           <input 
             type="text" 
             id="searchInput"
-            placeholder="Rechercher une ville, école..." 
+            placeholder="Ville, école, discipline..." 
             class="w-full pl-9 pr-3 py-1.5 bg-zinc-50 hover:bg-zinc-100/80 focus:bg-white border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 transition"
           />
         </div>
 
+        <!-- Type Filter -->
         <select 
           id="typeFilter" 
-          class="px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer font-medium max-w-[150px] sm:max-w-none"
+          class="w-32 sm:w-40 shrink-0 px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer font-medium truncate"
         >
-          <option value="Tous">Tous les types d'échanges</option>
-          <option value="courrier">✉️ Correspondance / Courrier (1000+)</option>
-          <option value="echange">🤝 Échange scolaire (1600+)</option>
-          <option value="voyage">🚌 Voyage / Séjour (1100+)</option>
-          <option value="appariement">🏫 Appariement (400)</option>
-          <option value="etwinning">💻 Projet eTwinning (290+)</option>
-          <option value="erasmus">🇪🇺 Erasmus+ (160+)</option>
+          <option value="Tous">Tous les types</option>
+          <option value="courrier">✉️ Courrier / Lettres</option>
+          <option value="echange">🤝 Échange scolaire</option>
+          <option value="voyage">🚌 Voyage / Séjour</option>
+          <option value="appariement">🏫 Appariement</option>
+          <option value="etwinning">💻 eTwinning</option>
+          <option value="erasmus">🇪🇺 Erasmus+</option>
         </select>
 
+        <!-- Sort Filter (New Coherent Sorting Options) -->
+        <select 
+          id="sortOrder" 
+          class="w-36 sm:w-44 shrink-0 px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer font-medium truncate"
+        >
+          <option value="date-desc">🕒 Plus récentes d'abord</option>
+          <option value="date-asc">⏳ Plus anciennes d'abord</option>
+          <option value="school-asc">🔤 Établissement (A → Z)</option>
+          <option value="city-asc">📍 Ville (A → Z)</option>
+          <option value="country-asc">🌍 Pays (A → Z)</option>
+          <option value="type-asc">🎯 Type de projet</option>
+        </select>
+
+        <!-- Propose Announcement Button in Header -->
         <a 
           href="https://docs.google.com/forms/d/e/1FAIpQLSc2-LqLr9Aj3VNs3-7k2CalyZHeWD9sLXp2cOYYEDLXh_wwAg/viewform?pli=1" 
           target="_blank" 
           rel="noopener noreferrer"
           class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition hover:scale-105 active:scale-95 whitespace-nowrap cursor-pointer shrink-0"
-          style="display: flex !important; visibility: visible !important;"
           title="Proposer une annonce"
         >
-          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-          <span>Proposer une annonce</span>
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>Proposer<span class="hidden md:inline"> une annonce</span></span>
         </a>
       </div>
     </div>
@@ -128,45 +168,61 @@
   <main class="flex-1 relative">
     <div id="map"></div>
 
-    <!-- Floating Propose Button directly on the map (always visible in iframe and fullscreen) -->
+    <!-- Floating Action Button (FAB) directly on the map -->
     <a 
+      id="floatingProposeBtn"
       href="https://docs.google.com/forms/d/e/1FAIpQLSc2-LqLr9Aj3VNs3-7k2CalyZHeWD9sLXp2cOYYEDLXh_wwAg/viewform?pli=1" 
       target="_blank" 
       rel="noopener noreferrer"
-      class="absolute top-4 right-4 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl shadow-lg border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition hover:scale-105 active:scale-95 cursor-pointer"
-      style="z-index: 800 !important; display: flex !important; visibility: visible !important;"
-      title="Proposer un nouvel établissement / projet"
+      class="absolute bottom-5 right-5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl shadow-xl border-2 border-white text-xs font-bold flex items-center gap-2 transition hover:scale-105 active:scale-95 cursor-pointer"
+      style="z-index: 1000 !important;"
+      title="Proposer un nouvel établissement / projet (Formulaire gratuit)"
     >
-      <i data-lucide="plus-circle" class="w-4 h-4"></i>
+      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
       <span>Proposer une annonce</span>
     </a>
 
     <!-- Floating Legend / Info -->
-    <div class="absolute bottom-4 left-4 z-400 bg-white/95 backdrop-blur-xs px-3 py-2 rounded-xl shadow-md border border-zinc-200 text-[11px] text-zinc-600 hidden sm:flex items-center gap-3">
+    <div class="absolute bottom-5 left-4 z-400 bg-white/95 backdrop-blur-xs px-3 py-2 rounded-xl shadow-md border border-zinc-200 text-[11px] text-zinc-600 hidden sm:flex items-center gap-3" style="z-index: 500 !important;">
       <span class="flex items-center gap-1.5">
         <span class="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span>
         Établissement vérifié
       </span>
       <span class="text-zinc-300">•</span>
-      <span>Cliquez sur un marqueur pour afficher la fiche complète</span>
+      <span>1 épingle par établissement</span>
+      <span class="text-zinc-300">•</span>
+      <span>Cliquez pour consulter l'annonce</span>
     </div>
   </main>
 
-  <!-- Modal Detail Popin (Always in absolute forefront above Leaflet tiles/markers/fullscreen) -->
+  <!-- Modal Detail Popin -->
   <div id="projectModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden" style="z-index: 999999 !important;">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in relative" style="z-index: 1000000 !important;">
       <div class="flex items-start justify-between">
-        <div>
-          <span id="modalType" class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold uppercase rounded-md border border-emerald-200">
-            Échange
-          </span>
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="modalType" class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold uppercase rounded-md border border-emerald-200">
+              Échange
+            </span>
+            <!-- Publication Date Badge -->
+            <span id="modalDateBadge" class="inline-flex items-center gap-1 text-[11px] text-zinc-500 font-medium bg-zinc-100 px-2 py-0.5 rounded-md">
+              <i data-lucide="calendar" class="w-3 h-3 text-emerald-600"></i>
+              <span id="modalDate">-</span>
+            </span>
+          </div>
+
           <h2 id="modalSchool" class="text-lg font-bold text-zinc-900 mt-2">Nom de l'établissement</h2>
-          <p id="modalLocation" class="text-xs text-zinc-500 font-medium flex items-center gap-1 mt-0.5">
+          <p id="modalLocation" class="text-xs text-zinc-500 font-medium flex items-center gap-1">
             <i data-lucide="map-pin" class="w-3.5 h-3.5 text-zinc-400"></i>
             <span>Ville, Pays</span>
           </p>
         </div>
-        <button id="closeModal" class="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition">
+
+        <button id="closeModal" class="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -202,22 +258,155 @@
         <a 
           id="modalEmailBtn"
           href="#" 
-          class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs"
+          class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
         >
           <i data-lucide="mail" class="w-3.5 h-3.5"></i>
           <span>Contacter</span>
         </a>
       </div>
+
+      <!-- Modal Navigation Bar (Previous / Next according to active sort order) -->
+      <div class="flex items-center justify-between pt-2 border-t border-zinc-100 text-xs">
+        <button id="prevProjectBtn" class="px-2.5 py-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition flex items-center gap-1 cursor-pointer">
+          <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+          <span>Précédente</span>
+        </button>
+        <span id="modalNavCount" class="text-[11px] text-zinc-400 font-medium">1 / 1</span>
+        <button id="nextProjectBtn" class="px-2.5 py-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition flex items-center gap-1 cursor-pointer">
+          <span>Suivante</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Sheet Configuration & Sync Modal -->
+  <div id="sheetConfigModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden" style="z-index: 9999999 !important;">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 space-y-4 relative">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+            <i data-lucide="refresh-cw" class="w-5 h-5 text-emerald-600"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-zinc-900">Synchronisation Google Sheet</h3>
+            <p class="text-xs text-zinc-500">Mises à jour automatiques en direct sans ré-exporter sur GitHub</p>
+          </div>
+        </div>
+        <button id="closeSheetModal" class="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-zinc-600 space-y-2 bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-200/80 leading-relaxed">
+        <p>
+          <strong>Comment ça marche ?</strong> En reliant le lien de votre feuille Google Sheet ci-dessous, la carte récupère directement vos dernières annonces validées et <strong>masque automatiquement les annonces que vous avez supprimées</strong> de votre tableau !
+        </p>
+        <p class="text-[11px] text-emerald-800">
+          💡 La feuille doit être en lecture publique (Partager ➔ <em>Tous les utilisateurs disposant du lien peuvent consulter</em>).
+        </p>
+      </div>
+
+      <form id="sheetSyncForm" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-zinc-700 mb-1">
+            Lien de votre Google Sheet (Partage ou export CSV) :
+          </label>
+          <input 
+            type="url" 
+            id="sheetUrlInput" 
+            placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+            class="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-zinc-800"
+          />
+        </div>
+
+        <div id="syncFeedback" class="hidden text-xs p-2.5 rounded-xl"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button 
+            type="button" 
+            id="resetSheetBtn"
+            class="px-3 py-2 text-xs text-zinc-600 hover:text-red-600 hover:bg-zinc-100 rounded-xl transition cursor-pointer"
+          >
+            Effacer
+          </button>
+          <button 
+            type="submit" 
+            id="saveSyncBtn"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Enregistrer & Synchroniser</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script>
     // =========================================================================
-    // CONFIGURATION GOOGLE SHEET (Optionnel mais recommandé pour le temps réel)
-    // Collez ici le lien de partage ou d'export CSV de votre Google Sheet
-    // Exemple : "https://docs.google.com/spreadsheets/d/VOTRE_ID_DE_SHEET/gviz/tq?tqx=out:csv"
+    // CONFIGURATION GOOGLE SHEET (Optionnel - modifiable aussi via le bouton Synchro)
     // =========================================================================
-    let GOOGLE_SHEET_CSV_URL = ""; 
+    let GOOGLE_SHEET_CSV_URL = localStorage.getItem('intercambios_sheet_url') || "";
+
+    // Dictionnaire haute fidélité des villes de France et d'Espagne pour géocodage instantané (0 ms)
+    const FAST_CITIES = {
+      paris: { lat: 48.8566, lng: 2.3522 },
+      lyon: { lat: 45.764, lng: 4.8357 },
+      marseille: { lat: 43.2965, lng: 5.3698 },
+      toulouse: { lat: 43.6047, lng: 1.4442 },
+      nice: { lat: 43.7102, lng: 7.262 },
+      nantes: { lat: 47.2184, lng: -1.5536 },
+      strasbourg: { lat: 48.5734, lng: 7.7521 },
+      montpellier: { lat: 43.6108, lng: 3.8767 },
+      bordeaux: { lat: 44.8378, lng: -0.5792 },
+      lille: { lat: 50.6292, lng: 3.0573 },
+      rennes: { lat: 48.1173, lng: -1.6778 },
+      reims: { lat: 49.2583, lng: 4.0317 },
+      grenoble: { lat: 45.1885, lng: 5.7245 },
+      dijon: { lat: 47.322, lng: 5.0415 },
+      angers: { lat: 47.4784, lng: -0.5632 },
+      rouen: { lat: 49.4432, lng: 1.0999 },
+      angouleme: { lat: 45.6497, lng: 0.1509 },
+      angoulême: { lat: 45.6497, lng: 0.1509 },
+      lodeve: { lat: 43.7315, lng: 3.2911 },
+      lodève: { lat: 43.7315, lng: 3.2911 },
+      niort: { lat: 46.3185, lng: -0.4782 },
+      narbonne: { lat: 43.1861, lng: 2.9741 },
+      albi: { lat: 43.9314, lng: 2.1526 },
+      arcachon: { lat: 44.6546, lng: -1.153 },
+      dinan: { lat: 48.4517, lng: -2.0491 },
+      vitre: { lat: 48.125, lng: -1.2087 },
+      vitré: { lat: 48.125, lng: -1.2087 },
+      concarneau: { lat: 47.8642, lng: -3.9019 },
+      madrid: { lat: 40.4168, lng: -3.7038 },
+      barcelone: { lat: 41.3879, lng: 2.1699 },
+      barcelona: { lat: 41.3879, lng: 2.1699 },
+      seville: { lat: 37.3891, lng: -5.9845 },
+      sevilla: { lat: 37.3891, lng: -5.9845 },
+      valence: { lat: 39.4699, lng: -0.3763 },
+      valencia: { lat: 39.4699, lng: -0.3763 },
+      zaragoza: { lat: 41.6488, lng: -0.8891 },
+      saragosse: { lat: 41.6488, lng: -0.8891 },
+      malaga: { lat: 36.7213, lng: -4.4214 },
+      málaga: { lat: 36.7213, lng: -4.4214 },
+      bilbao: { lat: 43.263, lng: -2.935 },
+      grenade: { lat: 37.1773, lng: -3.5986 },
+      granada: { lat: 37.1773, lng: -3.5986 },
+      cordoue: { lat: 37.8882, lng: -4.7794 },
+      cordoba: { lat: 37.8882, lng: -4.7794 },
+      toledo: { lat: 39.8628, lng: -4.0273 },
+      tolede: { lat: 39.8628, lng: -4.0273 },
+      salamanca: { lat: 40.9701, lng: -5.6635 },
+      alicante: { lat: 38.3452, lng: -0.481 },
+      cadix: { lat: 36.5271, lng: -6.2886 },
+      cadiz: { lat: 36.5271, lng: -6.2886 },
+      burgos: { lat: 42.3376, lng: -3.7044 },
+      murcia: { lat: 37.9955, lng: -1.1382 },
+      ourense: { lat: 42.188, lng: -7.1035 },
+      valladolid: { lat: 41.6268, lng: -4.7217 },
+      granollers: { lat: 41.3976, lng: 2.1743 }
+    };
 
     // Initialisation de la carte Leaflet
     const map = L.map('map', {
@@ -231,10 +420,10 @@
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> • La Casa del Profe'
     }).addTo(map);
 
-    // Groupe de regroupement de marqueurs fluide pour 2 240+ points
+    // Groupe de regroupement de marqueurs fluide
     const clusterGroup = L.markerClusterGroup({
       chunkedLoading: true,
-      maxClusterRadius: 40,
+      maxClusterRadius: 35,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       iconCreateFunction: function(cluster) {
@@ -251,27 +440,82 @@
     map.addLayer(clusterGroup);
 
     let allProjects = [];
+    let currentFilteredProjects = [];
+    let currentModalIndex = -1;
 
-    // Parseur CSV rapide
-    function parseCSV(text) {
-      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-      if (lines.length < 2) return [];
-      const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-      
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v ? v.replace(/^"|"$/g, '').replace(/""/g, '"').trim() : '');
-        rows.push(row);
+    // Parser dates robustement
+    function parseDate(dStr) {
+      if (!dStr) return 0;
+      if (typeof dStr === 'number') return dStr;
+      const s = String(dStr).trim();
+      if (s.includes('T') || (s.includes('-') && s.length >= 10)) {
+        const t = Date.parse(s);
+        if (!isNaN(t)) return t;
       }
-      return { headers, rows };
+      const parts = s.split(/[\/\-]/);
+      if (parts.length === 3) {
+        let day = parseInt(parts[0], 10);
+        let month = parseInt(parts[1], 10) - 1;
+        let year = parseInt(parts[2], 10);
+        if (year < 100) year += 2000;
+        const d = new Date(year, month, day);
+        if (!isNaN(d.getTime())) return d.getTime();
+      }
+      return 0;
     }
 
-    // Geocodage léger avec cache localStorage
-    async function geocodeCity(city, country) {
-      const cacheKey = `geo_${city}_${country}`.toLowerCase().replace(/\s+/g, '_');
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) return JSON.parse(cached);
+    function formatDate(dStr) {
+      const ts = parseDate(dStr);
+      if (!ts) return dStr || 'Date récente';
+      const d = new Date(ts);
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
 
+    // Déduplication stricte : 1 établissement unique = 1 seule épingle sur la carte !
+    function deduplicateProjects(list) {
+      const map = new Map();
+      function norm(str) {
+        return (str || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      }
+
+      for (const p of list) {
+        if (!p) continue;
+        const name = norm(p.schoolName);
+        const city = norm(p.schoolCity);
+        const email = norm(p.contactEmail);
+        const desc = norm(p.description).slice(0, 30);
+        const key = (email && email.includes('@')) ? `${name}___${email}` : `${name}___${city}___${desc}`;
+
+        if (!map.has(key)) {
+          map.set(key, p);
+        } else {
+          const existing = map.get(key);
+          const scoreExisting = (existing.latitude && existing.longitude ? 10 : 0) + (existing.contactPhone ? 2 : 0) + (existing.description ? existing.description.length : 0);
+          const scoreP = (p.latitude && p.longitude ? 10 : 0) + (p.contactPhone ? 2 : 0) + (p.description ? p.description.length : 0);
+          if (scoreP > scoreExisting) {
+            map.set(key, p);
+          }
+        }
+      }
+      return Array.from(map.values());
+    }
+
+    // Géocodage instantané avec dictionnaire + cache
+    async function geocodeLocationFast(city, country) {
+      const cleanCity = (city || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (FAST_CITIES[cleanCity]) {
+        return FAST_CITIES[cleanCity];
+      }
+      for (const [k, coords] of Object.entries(FAST_CITIES)) {
+        if (cleanCity.includes(k) || k.includes(cleanCity)) {
+          return coords;
+        }
+      }
+      const cacheKey = `geo_${cleanCity}_${(country || 'fr').toLowerCase()}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try { return JSON.parse(cached); } catch(e) {}
+      }
       try {
         const q = encodeURIComponent(`${city}, ${country || 'France'}`);
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`);
@@ -283,68 +527,141 @@
             return coords;
           }
         }
-      } catch (e) {
-        console.warn("Geocoding failed for", city);
+      } catch (err) {}
+
+      // Fallback pays
+      const c = (country || '').toLowerCase();
+      if (c.includes('esp')) return { lat: 40.4168, lng: -3.7038 };
+      return { lat: 46.2276, lng: 2.2137 };
+    }
+
+    // Parseur CSV rapide
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) return { headers: [], rows: [] };
+      
+      function parseLine(t) {
+        const res = [];
+        let cur = '';
+        let inQ = false;
+        for (let i = 0; i < t.length; i++) {
+          const ch = t[i];
+          if (ch === '"') {
+            if (inQ && t[i+1] === '"') { cur += '"'; i++; }
+            else { inQ = !inQ; }
+          } else if (ch === ',' && !inQ) {
+            res.push(cur.trim());
+            cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        res.push(cur.trim());
+        return res;
       }
-      return null;
+
+      const headers = parseLine(lines[0]).map(h => h.replace(/^"|"$/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        rows.push(parseLine(lines[i]));
+      }
+      return { headers, rows };
     }
 
     // Synchronisation en direct avec la Google Sheet
     async function loadGoogleSheetUpdates() {
-      if (!GOOGLE_SHEET_CSV_URL) return;
+      const sheetUrl = localStorage.getItem('intercambios_sheet_url') || GOOGLE_SHEET_CSV_URL;
+      if (!sheetUrl) return;
+
       try {
-        let url = GOOGLE_SHEET_CSV_URL;
-        if (url.includes('/edit')) {
-          url = url.replace(/\/edit.*$/, '/gviz/tq?tqx=out:csv');
+        let fetchUrl = sheetUrl.trim();
+        if (fetchUrl.includes('docs.google.com/spreadsheets/d/')) {
+          const match = fetchUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+          if (match && match[1]) {
+            fetchUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv`;
+          }
         }
-        const res = await fetch(url);
+
+        const res = await fetch(fetchUrl);
         if (!res.ok) return;
         const text = await res.text();
         const { headers, rows } = parseCSV(text);
+        if (rows.length === 0) return;
 
-        // Trouve les colonnes
-        const colSchool = headers.findIndex(h => h.includes("etablissement") || h.includes("ecole") || h.includes("nom"));
-        const colCity = headers.findIndex(h => h.includes("ville") || h.includes("ciudad"));
+        const colSchool = headers.findIndex(h => h.includes("etablissement") || h.includes("ecole") || h.includes("college") || h.includes("lycee") || h.includes("nom"));
+        const colCity = headers.findIndex(h => h.includes("ville") || h.includes("commune") || h.includes("ciudad"));
         const colCountry = headers.findIndex(h => h.includes("pays"));
         const colType = headers.findIndex(h => h.includes("type"));
         const colSubjects = headers.findIndex(h => h.includes("matiere") || h.includes("discipline") || h.includes("langue"));
-        const colEmail = headers.findIndex(h => h.includes("email") || h.includes("mail"));
-        const colContact = headers.findIndex(h => h.includes("prenom") || h.includes("contact"));
+        const colGrades = headers.findIndex(h => h.includes("niveau") || h.includes("classe") || h.includes("age"));
+        const colDest = headers.findIndex(h => h.includes("destination") || h.includes("souhaite"));
+        const colPeriod = headers.findIndex(h => h.includes("periode") || h.includes("mois"));
         const colDesc = headers.findIndex(h => h.includes("description") || h.includes("projet"));
+        const colDetails = headers.findIndex(h => h.includes("recherche") || h.includes("partenaire"));
+        const colFirstName = headers.findIndex(h => h.includes("prenom"));
+        const colLastName = headers.findIndex(h => h.includes("nom de famille") || h.includes("contact"));
+        const colEmail = headers.findIndex(h => h.includes("email") || h.includes("courriel") || h.includes("mail"));
+        const colPhone = headers.findIndex(h => h.includes("tel") || h.includes("portable"));
+        const colDate = headers.findIndex(h => h.includes("horodateur") || h.includes("timestamp") || h.includes("date"));
+        const colStatus = headers.findIndex(h => h.includes("statut") || h.includes("valide") || h.includes("etat"));
 
+        const sheetProjects = [];
         for (const row of rows) {
-          const schoolName = row[colSchool] || "Établissement";
-          const city = row[colCity] || "";
-          const country = row[colCountry] || "France";
-
-          // Vérifie si déjà présent dans l'historique
-          const exists = allProjects.some(p => p.schoolName && p.schoolName.toLowerCase() === schoolName.toLowerCase() && p.schoolCity && p.schoolCity.toLowerCase() === city.toLowerCase());
-          if (!exists && city) {
-            const coords = await geocodeCity(city, country);
-            if (coords) {
-              const newProj = {
-                schoolName,
-                schoolCity: city,
-                schoolCountry: country,
-                projectType: row[colType] || "Échange",
-                subjects: row[colSubjects] || "Espagnol",
-                gradeLevels: "Tous niveaux",
-                destination: "Espagne",
-                period: "En cours",
-                description: row[colDesc] || "Nouvelle annonce reçue",
-                contactFirstName: row[colContact] || "",
-                contactLastName: "",
-                contactEmail: row[colEmail] || "",
-                latitude: coords.lat,
-                longitude: coords.lng,
-              };
-              allProjects.push(newProj);
+          // Si une colonne de statut existe et est marquée rejetée/supprimée, ignorer
+          if (colStatus !== -1 && row[colStatus]) {
+            const st = row[colStatus].toLowerCase();
+            if (st.includes('refus') || st.includes('rejet') || st.includes('supprim') || st.includes('non')) {
+              continue;
             }
           }
+
+          const schoolName = (colSchool !== -1 ? row[colSchool] : '') || "Établissement";
+          const city = (colCity !== -1 ? row[colCity] : '') || "";
+          const country = (colCountry !== -1 ? row[colCountry] : '') || "France";
+          if (!city && !schoolName) continue;
+
+          const coords = await geocodeLocationFast(city, country);
+
+          sheetProjects.push({
+            schoolName,
+            schoolCity: city,
+            schoolCountry: country,
+            projectType: (colType !== -1 ? row[colType] : '') || "Échange",
+            subjects: (colSubjects !== -1 ? row[colSubjects] : '') || "Espagnol",
+            gradeLevels: (colGrades !== -1 ? row[colGrades] : '') || "Tous niveaux",
+            destination: (colDest !== -1 ? row[colDest] : '') || "Espagne",
+            period: (colPeriod !== -1 ? row[colPeriod] : '') || "Année scolaire",
+            description: (colDesc !== -1 ? row[colDesc] : '') || "Projet d'échange",
+            searchDetails: (colDetails !== -1 ? row[colDetails] : '') || "",
+            contactFirstName: (colFirstName !== -1 ? row[colFirstName] : '') || "",
+            contactLastName: (colLastName !== -1 ? row[colLastName] : '') || "",
+            contactEmail: (colEmail !== -1 ? row[colEmail] : '') || "",
+            contactPhone: (colPhone !== -1 ? row[colPhone] : '') || "",
+            createdAt: (colDate !== -1 ? row[colDate] : '') || new Date().toISOString(),
+            latitude: coords ? coords.lat : 46.22,
+            longitude: coords ? coords.lng : 2.21,
+          });
         }
-        applyFilters();
+
+        if (sheetProjects.length > 0) {
+          // Si la feuille contient au moins 10 annonces, elle est considérée comme la source de vérité.
+          // Ainsi, toute annonce supprimée de la feuille disparaît automatiquement de la carte !
+          if (sheetProjects.length >= allProjects.length * 0.7) {
+            allProjects = deduplicateProjects(sheetProjects);
+          } else {
+            // Sinon fusion intelligente avec déduplication
+            allProjects = deduplicateProjects([...sheetProjects, ...allProjects]);
+          }
+
+          applyFilters();
+          const badge = document.getElementById('counterBadge');
+          if (badge) {
+            badge.classList.remove('bg-emerald-50', 'text-emerald-800');
+            badge.classList.add('bg-emerald-100', 'text-emerald-900', 'font-bold');
+          }
+        }
       } catch (err) {
-        console.error("Live Sheet sync error:", err);
+        console.warn("Live Google Sheet sync notice:", err);
       }
     }
 
@@ -373,20 +690,29 @@
       if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
         modal.classList.add('hidden');
       }
+      if (!modal.classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft') showPrevProject();
+        if (e.key === 'ArrowRight') showNextProject();
+      }
     });
 
-    function openProjectModal(p) {
+    function openProjectModalByIndex(idx) {
+      if (idx < 0 || idx >= currentFilteredProjects.length) return;
+      currentModalIndex = idx;
+      const p = currentFilteredProjects[idx];
+
       document.getElementById('modalSchool').textContent = p.schoolName || 'Établissement';
       document.getElementById('modalLocation').textContent = `${p.schoolCity || ''}, ${p.schoolCountry || ''}`;
       document.getElementById('modalType').textContent = p.projectType || 'Échange';
+      document.getElementById('modalDate').textContent = formatDate(p.createdAt);
       document.getElementById('modalSubjects').textContent = p.subjects || 'Non précisé';
       document.getElementById('modalGrades').textContent = p.gradeLevels || 'Non précisé';
       document.getElementById('modalDestination').textContent = `${p.destination || 'Non précisée'} • ${p.period || 'Non précisée'}`;
       document.getElementById('modalDescription').textContent = p.description || p.searchDetails || 'Aucune description détaillée.';
       
-      const contactName = `${p.contactFirstName || ''} ${p.contactLastName || ''}`.trim() || 'Enseignant';
+      const contactName = `${p.contactFirstName || ''} ${p.contactLastName || ''}`.trim() || 'Enseignant référent';
       document.getElementById('modalContact').textContent = contactName;
-      document.getElementById('modalFunction').textContent = p.contactFunction || 'Enseignant référent';
+      document.getElementById('modalFunction').textContent = p.contactFunction || 'Enseignant';
 
       const emailBtn = document.getElementById('modalEmailBtn');
       if (p.contactEmail) {
@@ -396,8 +722,9 @@
         emailBtn.style.display = 'none';
       }
 
-      // En mode plein écran, le navigateur masque les éléments hors du conteneur plein écran.
-      // On déplace donc la modale dans le conteneur plein écran actif avec le z-index le plus élevé.
+      document.getElementById('modalNavCount').textContent = `${idx + 1} / ${currentFilteredProjects.length}`;
+
+      // Mode plein écran support
       const targetContainer = document.fullscreenElement || document.body;
       if (modal.parentElement !== targetContainer) {
         targetContainer.appendChild(modal);
@@ -407,25 +734,43 @@
       lucide.createIcons();
     }
 
+    function showPrevProject() {
+      if (currentFilteredProjects.length === 0) return;
+      let nextIdx = currentModalIndex - 1;
+      if (nextIdx < 0) nextIdx = currentFilteredProjects.length - 1;
+      openProjectModalByIndex(nextIdx);
+    }
+
+    function showNextProject() {
+      if (currentFilteredProjects.length === 0) return;
+      let nextIdx = currentModalIndex + 1;
+      if (nextIdx >= currentFilteredProjects.length) nextIdx = 0;
+      openProjectModalByIndex(nextIdx);
+    }
+
+    document.getElementById('prevProjectBtn').onclick = showPrevProject;
+    document.getElementById('nextProjectBtn').onclick = showNextProject;
+
     function renderMarkers(projectsToDisplay) {
       clusterGroup.clearLayers();
       const markers = [];
 
-      for (const p of projectsToDisplay) {
-        if (!p.latitude || !p.longitude) continue;
+      projectsToDisplay.forEach((p, idx) => {
+        if (!p.latitude || !p.longitude) return;
         const marker = L.marker([p.latitude, p.longitude], {
           icon: createCustomMarkerIcon(p.projectType)
         });
 
         marker.on('click', () => {
-          openProjectModal(p);
+          openProjectModalByIndex(idx);
         });
 
         markers.push(marker);
-      }
+      });
 
       clusterGroup.addLayers(markers);
-      document.getElementById('counter').textContent = `${projectsToDisplay.length} établissements`;
+      const isSheetActive = !!(localStorage.getItem('intercambios_sheet_url') || GOOGLE_SHEET_CSV_URL);
+      document.getElementById('counter').textContent = `${projectsToDisplay.length} établissements${isSheetActive ? ' (Direct)' : ''}`;
     }
 
     function matchesCategory(projectType, filter) {
@@ -444,8 +789,9 @@
     function applyFilters() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const type = document.getElementById('typeFilter').value;
+      const sortOrder = document.getElementById('sortOrder').value;
 
-      const filtered = allProjects.filter(p => {
+      let filtered = allProjects.filter(p => {
         const matchesType = matchesCategory(p.projectType, type);
         const matchesQuery = !query || 
           (p.schoolName && p.schoolName.toLowerCase().includes(query)) ||
@@ -458,6 +804,27 @@
         return matchesType && matchesQuery;
       });
 
+      // Tris cohérents
+      filtered.sort((a, b) => {
+        switch (sortOrder) {
+          case 'date-desc': // Plus récentes d'abord
+            return parseDate(b.createdAt) - parseDate(a.createdAt);
+          case 'date-asc': // Plus anciennes d'abord
+            return parseDate(a.createdAt) - parseDate(b.createdAt);
+          case 'school-asc': // Établissement A-Z
+            return (a.schoolName || '').localeCompare(b.schoolName || '', 'fr');
+          case 'city-asc': // Ville A-Z
+            return (a.schoolCity || '').localeCompare(b.schoolCity || '', 'fr');
+          case 'country-asc': // Pays A-Z
+            return (a.schoolCountry || '').localeCompare(b.schoolCountry || '', 'fr');
+          case 'type-asc': // Type de projet
+            return (a.projectType || '').localeCompare(b.projectType || '', 'fr');
+          default:
+            return parseDate(b.createdAt) - parseDate(a.createdAt);
+        }
+      });
+
+      currentFilteredProjects = filtered;
       renderMarkers(filtered);
     }
 
@@ -480,18 +847,63 @@
       });
     }
 
+    // Événements filtres et tri
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('typeFilter').addEventListener('change', applyFilters);
+    document.getElementById('sortOrder').addEventListener('change', applyFilters);
 
-    // Chargement des 2 240 projets historiques depuis projects.json
+    // Modal de Configuration Google Sheet
+    const sheetModal = document.getElementById('sheetConfigModal');
+    const openSheetBtn = document.getElementById('openSheetModal');
+    const closeSheetBtn = document.getElementById('closeSheetModal');
+    const sheetUrlInput = document.getElementById('sheetUrlInput');
+    const sheetSyncForm = document.getElementById('sheetSyncForm');
+    const syncFeedback = document.getElementById('syncFeedback');
+    const resetSheetBtn = document.getElementById('resetSheetBtn');
+
+    openSheetBtn.onclick = () => {
+      sheetUrlInput.value = localStorage.getItem('intercambios_sheet_url') || GOOGLE_SHEET_CSV_URL;
+      syncFeedback.classList.add('hidden');
+      sheetModal.classList.remove('hidden');
+    };
+    closeSheetBtn.onclick = () => sheetModal.classList.add('hidden');
+    sheetModal.onclick = (e) => {
+      if (e.target === sheetModal) sheetModal.classList.add('hidden');
+    };
+
+    resetSheetBtn.onclick = () => {
+      localStorage.removeItem('intercambios_sheet_url');
+      sheetUrlInput.value = '';
+      syncFeedback.className = 'text-xs p-2.5 rounded-xl bg-zinc-100 text-zinc-700 block';
+      syncFeedback.textContent = 'Configuration réinitialisée au fichier projects.json.';
+    };
+
+    sheetSyncForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const val = sheetUrlInput.value.trim();
+      if (!val) return;
+      localStorage.setItem('intercambios_sheet_url', val);
+      syncFeedback.className = 'text-xs p-2.5 rounded-xl bg-blue-50 text-blue-700 block';
+      syncFeedback.textContent = 'Connexion à votre Google Sheet en cours...';
+
+      await loadGoogleSheetUpdates();
+
+      syncFeedback.className = 'text-xs p-2.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold block';
+      syncFeedback.textContent = '✅ Synchronisation réussie ! Votre carte est maintenant connectée en direct.';
+      setTimeout(() => {
+        sheetModal.classList.add('hidden');
+      }, 1500);
+    };
+
+    // Chargement initial des annonces depuis projects.json avec déduplication
     fetch('projects.json')
       .then(res => {
         if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
         return res.json();
       })
       .then(data => {
-        allProjects = data;
-        renderMarkers(allProjects);
+        allProjects = deduplicateProjects(data);
+        applyFilters();
         lucide.createIcons();
         loadGoogleSheetUpdates();
       })
