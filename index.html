@@ -58,8 +58,18 @@
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
       padding: 4px;
     }
+    /* Mode Plein Écran Universel et Infaillible (même en iframe) */
+    body.fullscreen-mode {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 99999999 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
   </style>
-<script src="/_aistudio-iframe.js?v=6634132a"></script></head>
+<script src="/_aistudio-iframe.js?v=1f94f900"></script></head>
 <body class="bg-zinc-50 flex flex-col h-screen overflow-hidden">
 
   <!-- Top Controls Bar -->
@@ -84,16 +94,6 @@
             <span id="counter">Chargement...</span>
           </div>
 
-          <!-- Google Sheet Live Sync Button -->
-          <button 
-            id="openSheetModal" 
-            title="Synchroniser / Configurer Google Sheet en direct"
-            class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 font-medium"
-          >
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-600"></i>
-            <span class="hidden sm:inline">Synchro Sheet</span>
-          </button>
-
           <button 
             id="fullscreenBtn" 
             title="Afficher en plein écran"
@@ -112,7 +112,7 @@
           <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
           <input 
             type="text" 
-            id="searchInput"
+            id="searchInput" 
             placeholder="Ville, école, discipline..." 
             class="w-full pl-9 pr-3 py-1.5 bg-zinc-50 hover:bg-zinc-100/80 focus:bg-white border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 transition"
           />
@@ -135,9 +135,10 @@
         <!-- Sort Filter (New Coherent Sorting Options) -->
         <select 
           id="sortOrder" 
-          class="w-36 sm:w-44 shrink-0 px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer font-medium truncate"
+          class="w-40 sm:w-52 shrink-0 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-800 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer font-semibold truncate"
         >
-          <option value="date-desc">🕒 Plus récentes d'abord</option>
+          <option value="date-desc">🕒 Plus récentes (moins de 3 mois)</option>
+          <option value="all-desc">📅 Toutes les annonces (par date)</option>
           <option value="date-asc">⏳ Plus anciennes d'abord</option>
           <option value="school-asc">🔤 Établissement (A → Z)</option>
           <option value="city-asc">📍 Ville (A → Z)</option>
@@ -280,72 +281,9 @@
     </div>
   </div>
 
-  <!-- Google Sheet Configuration & Sync Modal -->
-  <div id="sheetConfigModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden" style="z-index: 9999999 !important;">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 space-y-4 relative">
-      <div class="flex items-start justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
-            <i data-lucide="refresh-cw" class="w-5 h-5 text-emerald-600"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-zinc-900">Synchronisation Google Sheet</h3>
-            <p class="text-xs text-zinc-500">Mises à jour automatiques en direct sans ré-exporter sur GitHub</p>
-          </div>
-        </div>
-        <button id="closeSheetModal" class="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="text-xs text-zinc-600 space-y-2 bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-200/80 leading-relaxed">
-        <p>
-          <strong>Comment ça marche ?</strong> En reliant le lien de votre feuille Google Sheet ci-dessous, la carte récupère directement vos dernières annonces validées et <strong>masque automatiquement les annonces que vous avez supprimées</strong> de votre tableau !
-        </p>
-        <p class="text-[11px] text-emerald-800">
-          💡 La feuille doit être en lecture publique (Partager ➔ <em>Tous les utilisateurs disposant du lien peuvent consulter</em>).
-        </p>
-      </div>
-
-      <form id="sheetSyncForm" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-zinc-700 mb-1">
-            Lien de votre Google Sheet (Partage ou export CSV) :
-          </label>
-          <input 
-            type="url" 
-            id="sheetUrlInput" 
-            placeholder="https://docs.google.com/spreadsheets/d/.../edit"
-            class="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-zinc-800"
-          />
-        </div>
-
-        <div id="syncFeedback" class="hidden text-xs p-2.5 rounded-xl"></div>
-
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <button 
-            type="button" 
-            id="resetSheetBtn"
-            class="px-3 py-2 text-xs text-zinc-600 hover:text-red-600 hover:bg-zinc-100 rounded-xl transition cursor-pointer"
-          >
-            Effacer
-          </button>
-          <button 
-            type="submit" 
-            id="saveSyncBtn"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Enregistrer & Synchroniser</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
     // =========================================================================
-    // CONFIGURATION GOOGLE SHEET (Optionnel - modifiable aussi via le bouton Synchro)
+    // CONFIGURATION GOOGLE SHEET (Optionnel)
     // =========================================================================
     let GOOGLE_SHEET_CSV_URL = localStorage.getItem('intercambios_sheet_url') || "";
 
@@ -401,6 +339,9 @@
       alicante: { lat: 38.3452, lng: -0.481 },
       cadix: { lat: 36.5271, lng: -6.2886 },
       cadiz: { lat: 36.5271, lng: -6.2886 },
+      sisteron: { lat: 44.1975, lng: 5.9428 },
+      peyrolles: { lat: 43.6469, lng: 5.5833 },
+      "peyrolles-en-provence": { lat: 43.6469, lng: 5.5833 },
       burgos: { lat: 42.3376, lng: -3.7044 },
       murcia: { lat: 37.9955, lng: -1.1382 },
       ourense: { lat: 42.188, lng: -7.1035 },
@@ -447,19 +388,31 @@
     function parseDate(dStr) {
       if (!dStr) return 0;
       if (typeof dStr === 'number') return dStr;
-      const s = String(dStr).trim();
+      let s = String(dStr).trim();
+      // Fix legacy 2029 typo to 2024
+      if (s.includes('2029')) {
+        s = s.replace(/2029/g, '2024');
+      }
       if (s.includes('T') || (s.includes('-') && s.length >= 10)) {
         const t = Date.parse(s);
         if (!isNaN(t)) return t;
       }
-      const parts = s.split(/[\/\-]/);
-      if (parts.length === 3) {
-        let day = parseInt(parts[0], 10);
-        let month = parseInt(parts[1], 10) - 1;
-        let year = parseInt(parts[2], 10);
-        if (year < 100) year += 2000;
-        const d = new Date(year, month, day);
-        if (!isNaN(d.getTime())) return d.getTime();
+      const parts = s.split(/[\/\-\s]/);
+      if (parts.length >= 3) {
+        let p0 = parseInt(parts[0], 10);
+        let p1 = parseInt(parts[1], 10);
+        let p2 = parseInt(parts[2], 10);
+        if (p0 > 1900) {
+          // YYYY/MM/DD
+          const d = new Date(p0, p1 - 1, p2);
+          if (!isNaN(d.getTime())) return d.getTime();
+        } else {
+          // DD/MM/YYYY
+          if (p2 < 100) p2 += 2000;
+          if (p2 === 2029) p2 = 2024;
+          const d = new Date(p2, p1 - 1, p0);
+          if (!isNaN(d.getTime())) return d.getTime();
+        }
       }
       return 0;
     }
@@ -469,6 +422,24 @@
       if (!ts) return dStr || 'Date récente';
       const d = new Date(ts);
       return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    // Vérifie si une annonce a moins de 3 mois (~92 jours)
+    function isRecent(dStr, allItems) {
+      const ts = parseDate(dStr);
+      if (!ts) return false;
+      const threeMonthsMs = 92 * 24 * 60 * 60 * 1000;
+      let referenceTime = Date.now();
+      let maxTs = 0;
+      for (const item of allItems) {
+        const t = parseDate(item.createdAt);
+        if (t > maxTs) maxTs = t;
+      }
+      if (maxTs > 0 && (referenceTime - maxTs > 180 * 24 * 60 * 60 * 1000)) {
+        referenceTime = maxTs;
+      }
+      const diff = referenceTime - ts;
+      return diff >= -7 * 24 * 60 * 60 * 1000 && diff <= threeMonthsMs;
     }
 
     // Déduplication stricte : 1 établissement unique = 1 seule épingle sur la carte !
@@ -484,6 +455,12 @@
         const city = norm(p.schoolCity);
         const email = norm(p.contactEmail);
         const desc = norm(p.description).slice(0, 30);
+
+        // Bloquer et supprimer définitivement Collège Saint Michel Avignon
+        if ((name.includes('saint michel') || name.includes('saint-michel') || name.includes('st michel')) && (city.includes('avignon') || desc.includes('avignon'))) {
+          continue;
+        }
+
         const key = (email && email.includes('@')) ? `${name}___${email}` : `${name}___${city}___${desc}`;
 
         if (!map.has(key)) {
@@ -619,6 +596,11 @@
           const city = (colCity !== -1 ? row[colCity] : '') || "";
           const country = (colCountry !== -1 ? row[colCountry] : '') || "France";
           if (!city && !schoolName) continue;
+
+          // Blacklist deleted announcements
+          if (schoolName.toLowerCase().includes('saint michel') && city.toLowerCase().includes('avignon')) {
+            continue;
+          }
 
           const coords = await geocodeLocationFast(city, country);
 
@@ -801,13 +783,17 @@
           (p.destination && p.destination.toLowerCase().includes(query)) ||
           (p.description && p.description.toLowerCase().includes(query));
 
-        return matchesType && matchesQuery;
+        // When "Plus récentes (moins de 3 mois)" is chosen, filter to ONLY announcements dating from less than 3 months!
+        const matchesRecent = sortOrder === 'date-desc' ? isRecent(p.createdAt, allProjects) : true;
+
+        return matchesType && matchesQuery && matchesRecent;
       });
 
       // Tris cohérents
       filtered.sort((a, b) => {
         switch (sortOrder) {
-          case 'date-desc': // Plus récentes d'abord
+          case 'date-desc': // Plus récentes (moins de 3 mois)
+          case 'all-desc': // Toutes les annonces par date
             return parseDate(b.createdAt) - parseDate(a.createdAt);
           case 'date-asc': // Plus anciennes d'abord
             return parseDate(a.createdAt) - parseDate(b.createdAt);
@@ -828,22 +814,50 @@
       renderMarkers(filtered);
     }
 
-    // Gestion du mode Plein Écran
+    // Gestion du mode Plein Écran Universel (Compatible Iframes Blogger)
+    let isFsActive = false;
     const fsBtn = document.getElementById('fullscreenBtn');
     if (fsBtn) {
       fsBtn.onclick = () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
+        isFsActive = !isFsActive;
+        if (isFsActive) {
+          document.body.classList.add('fullscreen-mode');
+          fsBtn.innerHTML = `<i data-lucide="minimize-2" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Réduire</span>`;
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          }
         } else {
-          document.exitFullscreen().catch(() => {});
+          document.body.classList.remove('fullscreen-mode');
+          fsBtn.innerHTML = `<i data-lucide="maximize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Plein écran</span>`;
+          if (document.exitFullscreen && document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+          }
         }
-      };
-      document.addEventListener('fullscreenchange', () => {
-        const isFs = !!document.fullscreenElement;
-        fsBtn.innerHTML = isFs 
-          ? `<i data-lucide="minimize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Réduire</span>` 
-          : `<i data-lucide="maximize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Plein écran</span>`;
         lucide.createIcons();
+        setTimeout(() => map.invalidateSize(), 50);
+        setTimeout(() => map.invalidateSize(), 150);
+        setTimeout(() => map.invalidateSize(), 300);
+      };
+
+      document.addEventListener('fullscreenchange', () => {
+        const isBrowserFs = !!document.fullscreenElement;
+        if (!isBrowserFs && isFsActive) {
+          isFsActive = false;
+          document.body.classList.remove('fullscreen-mode');
+          fsBtn.innerHTML = `<i data-lucide="maximize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Plein écran</span>`;
+          lucide.createIcons();
+          setTimeout(() => map.invalidateSize(), 150);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isFsActive) {
+          isFsActive = false;
+          document.body.classList.remove('fullscreen-mode');
+          fsBtn.innerHTML = `<i data-lucide="maximize" class="w-4 h-4"></i><span class="hidden sm:inline font-medium">Plein écran</span>`;
+          lucide.createIcons();
+          setTimeout(() => map.invalidateSize(), 150);
+        }
       });
     }
 
@@ -851,49 +865,6 @@
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('typeFilter').addEventListener('change', applyFilters);
     document.getElementById('sortOrder').addEventListener('change', applyFilters);
-
-    // Modal de Configuration Google Sheet
-    const sheetModal = document.getElementById('sheetConfigModal');
-    const openSheetBtn = document.getElementById('openSheetModal');
-    const closeSheetBtn = document.getElementById('closeSheetModal');
-    const sheetUrlInput = document.getElementById('sheetUrlInput');
-    const sheetSyncForm = document.getElementById('sheetSyncForm');
-    const syncFeedback = document.getElementById('syncFeedback');
-    const resetSheetBtn = document.getElementById('resetSheetBtn');
-
-    openSheetBtn.onclick = () => {
-      sheetUrlInput.value = localStorage.getItem('intercambios_sheet_url') || GOOGLE_SHEET_CSV_URL;
-      syncFeedback.classList.add('hidden');
-      sheetModal.classList.remove('hidden');
-    };
-    closeSheetBtn.onclick = () => sheetModal.classList.add('hidden');
-    sheetModal.onclick = (e) => {
-      if (e.target === sheetModal) sheetModal.classList.add('hidden');
-    };
-
-    resetSheetBtn.onclick = () => {
-      localStorage.removeItem('intercambios_sheet_url');
-      sheetUrlInput.value = '';
-      syncFeedback.className = 'text-xs p-2.5 rounded-xl bg-zinc-100 text-zinc-700 block';
-      syncFeedback.textContent = 'Configuration réinitialisée au fichier projects.json.';
-    };
-
-    sheetSyncForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const val = sheetUrlInput.value.trim();
-      if (!val) return;
-      localStorage.setItem('intercambios_sheet_url', val);
-      syncFeedback.className = 'text-xs p-2.5 rounded-xl bg-blue-50 text-blue-700 block';
-      syncFeedback.textContent = 'Connexion à votre Google Sheet en cours...';
-
-      await loadGoogleSheetUpdates();
-
-      syncFeedback.className = 'text-xs p-2.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold block';
-      syncFeedback.textContent = '✅ Synchronisation réussie ! Votre carte est maintenant connectée en direct.';
-      setTimeout(() => {
-        sheetModal.classList.add('hidden');
-      }, 1500);
-    };
 
     // Chargement initial des annonces depuis projects.json avec déduplication
     fetch('projects.json')
