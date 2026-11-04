@@ -512,37 +512,41 @@
       return { lat: 46.2276, lng: 2.2137 };
     }
 
-    // Parseur CSV rapide
+    // Parseur CSV robuste supportant les champs multilignes et guillemets
     function parseCSV(text) {
-      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-      if (lines.length < 2) return { headers: [], rows: [] };
-      
-      function parseLine(t) {
-        const res = [];
-        let cur = '';
-        let inQ = false;
-        for (let i = 0; i < t.length; i++) {
-          const ch = t[i];
-          if (ch === '"') {
-            if (inQ && t[i+1] === '"') { cur += '"'; i++; }
-            else { inQ = !inQ; }
-          } else if (ch === ',' && !inQ) {
-            res.push(cur.trim());
-            cur = '';
-          } else {
-            cur += ch;
-          }
-        }
-        res.push(cur.trim());
-        return res;
-      }
-
-      const headers = parseLine(lines[0]).map(h => h.replace(/^"|"$/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
       const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        rows.push(parseLine(lines[i]));
+      let curRow = [];
+      let curVal = "";
+      let inQ = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          if (inQ && text[i + 1] === '"') {
+            curVal += '"';
+            i++;
+          } else {
+            inQ = !inQ;
+          }
+        } else if (ch === ',' && !inQ) {
+          curRow.push(curVal.trim());
+          curVal = "";
+        } else if ((ch === '\r' || ch === '\n') && !inQ) {
+          if (ch === '\r' && text[i + 1] === '\n') i++;
+          curRow.push(curVal.trim());
+          curVal = "";
+          if (curRow.length > 1) rows.push(curRow);
+          curRow = [];
+        } else {
+          curVal += ch;
+        }
       }
-      return { headers, rows };
+      if (curVal || curRow.length > 0) {
+        curRow.push(curVal.trim());
+        if (curRow.length > 1) rows.push(curRow);
+      }
+      if (rows.length < 2) return { headers: [], rows: [] };
+      const headers = rows[0].map(h => h.replace(/^"|"$/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+      return { headers, rows: rows.slice(1) };
     }
 
     // Synchronisation en direct avec la Google Sheet
@@ -565,26 +569,30 @@
         const { headers, rows } = parseCSV(text);
         if (rows.length === 0) return;
 
-        const colSchool = headers.findIndex(h => h.includes("etablissement") || h.includes("ecole") || h.includes("college") || h.includes("lycee") || h.includes("nom"));
+        // Identification précise des colonnes
+        const colSchool = headers.findIndex(h => h.includes("nom de votre etablissement") || (h.includes("nom") && h.includes("centro")) || h.includes("nom de l'etablissement"));
         const colCity = headers.findIndex(h => h.includes("ville") || h.includes("commune") || h.includes("ciudad"));
-        const colCountry = headers.findIndex(h => h.includes("pays"));
-        const colType = headers.findIndex(h => h.includes("type"));
-        const colSubjects = headers.findIndex(h => h.includes("matiere") || h.includes("discipline") || h.includes("langue"));
-        const colGrades = headers.findIndex(h => h.includes("niveau") || h.includes("classe") || h.includes("age"));
-        const colDest = headers.findIndex(h => h.includes("destination") || h.includes("souhaite"));
+        const colCountry = headers.findIndex(h => h.includes("pays de l'etablissement") || h === "pays" || h.includes("pais del centro"));
+        const colLat = headers.findIndex(h => h === "latitude" || h.includes("latitude"));
+        const colLng = headers.findIndex(h => h === "longitude" || h.includes("longitude"));
+        const colType = headers.findIndex(h => h.includes("type(s) de projet") || h.includes("tipo(s) de proyecto"));
+        const colSubjects = headers.findIndex(h => h.includes("discipline") || h.includes("matiere") || h.includes("langue") || h.includes("annees d'apprentissage"));
+        const colGrades = headers.findIndex(h => h.includes("age des eleves") || h.includes("edad de los alumnos") || h.includes("niveau") || h.includes("classe"));
+        const colDest = headers.findIndex(h => h.includes("pays recherche") || h.includes("destino deseado") || h.includes("destination"));
         const colPeriod = headers.findIndex(h => h.includes("periode") || h.includes("mois"));
-        const colDesc = headers.findIndex(h => h.includes("description") || h.includes("projet"));
+        const colDesc = headers.findIndex(h => h.includes("presentation du projet") || h.includes("descripcion del proyecto") || h.includes("description"));
         const colDetails = headers.findIndex(h => h.includes("recherche") || h.includes("partenaire"));
-        const colFirstName = headers.findIndex(h => h.includes("prenom"));
-        const colLastName = headers.findIndex(h => h.includes("nom de famille") || h.includes("contact"));
-        const colEmail = headers.findIndex(h => h.includes("email") || h.includes("courriel") || h.includes("mail"));
-        const colPhone = headers.findIndex(h => h.includes("tel") || h.includes("portable"));
+        const colContact = headers.findIndex(h => h.includes("prenom et nom") || h.includes("responsable") || h.includes("contact"));
+        const colEmail = headers.findIndex(h => h.includes("adresse e-mail de contact") || h.includes("correo electronico de contacto") || h.includes("email"));
+        const colPhone = headers.findIndex(h => h.includes("numero de telephone") || h.includes("telefono") || h.includes("tel"));
         const colDate = headers.findIndex(h => h.includes("horodateur") || h.includes("timestamp") || h.includes("date"));
-        const colStatus = headers.findIndex(h => h.includes("statut") || h.includes("valide") || h.includes("etat"));
+        const colStatus = headers.findIndex(h => h.includes("etat") || h.includes("statut") || h.includes("valide"));
 
         const sheetProjects = [];
         for (const row of rows) {
-          // Si une colonne de statut existe et est marquée rejetée/supprimée, ignorer
+          if (row.length < 2) continue;
+
+          // Si une colonne d'état existe et est marquée rejetée/supprimée, ignorer
           if (colStatus !== -1 && row[colStatus]) {
             const st = row[colStatus].toLowerCase();
             if (st.includes('refus') || st.includes('rejet') || st.includes('supprim') || st.includes('non')) {
@@ -592,42 +600,64 @@
             }
           }
 
-          const schoolName = (colSchool !== -1 ? row[colSchool] : '') || "Établissement";
-          const city = (colCity !== -1 ? row[colCity] : '') || "";
-          const country = (colCountry !== -1 ? row[colCountry] : '') || "France";
+          const schoolName = (colSchool !== -1 ? row[colSchool] : row[3] || row[1] || "").trim() || "Établissement";
+          const city = (colCity !== -1 ? row[colCity] : row[7] || "").trim() || "";
+          const country = (colCountry !== -1 ? row[colCountry] : row[10] || "France").trim() || "France";
           if (!city && !schoolName) continue;
 
-          // Blacklist deleted announcements
-          if (schoolName.toLowerCase().includes('saint michel') && city.toLowerCase().includes('avignon')) {
+          // Exclure toute annonce supprimée (ex. Saint Michel Avignon)
+          if ((schoolName.toLowerCase().includes('saint michel') || schoolName.toLowerCase().includes('st michel')) && (city.toLowerCase().includes('avignon') || (colDesc !== -1 && row[colDesc]?.toLowerCase().includes('avignon')))) {
             continue;
           }
 
-          const coords = await geocodeLocationFast(city, country);
+          // Récupération instantanée des coordonnées pré-calculées dans la Google Sheet
+          let coords = null;
+          if (colLat !== -1 && colLng !== -1 && row[colLat] && row[colLng]) {
+            const latVal = parseFloat(row[colLat].replace(",", "."));
+            const lngVal = parseFloat(row[colLng].replace(",", "."));
+            if (!isNaN(latVal) && !isNaN(lngVal) && (latVal !== 0 || lngVal !== 0)) {
+              coords = { lat: latVal, lng: lngVal };
+            }
+          }
+
+          // Si les coordonnées ne sont pas dans la feuille, utiliser le dictionnaire local instantané
+          if (!coords) {
+            coords = await geocodeLocationFast(city, country);
+          }
+
+          const contactPerson = (colContact !== -1 ? row[colContact] : "").trim();
+          const contactFirstName = contactPerson.split(/\s+/)[0] || "";
+          const contactLastName = contactPerson.split(/\s+/).slice(1).join(" ") || "";
+
+          let rowDate = (colDate !== -1 ? row[colDate] : "").trim() || new Date().toISOString();
+          if (rowDate.includes("2029")) {
+            rowDate = rowDate.replace(/2029/g, "2024");
+          }
 
           sheetProjects.push({
             schoolName,
             schoolCity: city,
             schoolCountry: country,
-            projectType: (colType !== -1 ? row[colType] : '') || "Échange",
-            subjects: (colSubjects !== -1 ? row[colSubjects] : '') || "Espagnol",
-            gradeLevels: (colGrades !== -1 ? row[colGrades] : '') || "Tous niveaux",
-            destination: (colDest !== -1 ? row[colDest] : '') || "Espagne",
-            period: (colPeriod !== -1 ? row[colPeriod] : '') || "Année scolaire",
-            description: (colDesc !== -1 ? row[colDesc] : '') || "Projet d'échange",
-            searchDetails: (colDetails !== -1 ? row[colDetails] : '') || "",
-            contactFirstName: (colFirstName !== -1 ? row[colFirstName] : '') || "",
-            contactLastName: (colLastName !== -1 ? row[colLastName] : '') || "",
-            contactEmail: (colEmail !== -1 ? row[colEmail] : '') || "",
-            contactPhone: (colPhone !== -1 ? row[colPhone] : '') || "",
-            createdAt: (colDate !== -1 ? row[colDate] : '') || new Date().toISOString(),
+            projectType: (colType !== -1 ? row[colType] : row[15] || "Échange").trim() || "Échange",
+            subjects: (colSubjects !== -1 ? row[colSubjects] : "Espagnol").trim() || "Espagnol",
+            gradeLevels: (colGrades !== -1 ? row[colGrades] : "Tous niveaux").trim() || "Tous niveaux",
+            destination: (colDest !== -1 ? row[colDest] : "Espagne").trim() || "Espagne",
+            period: (colPeriod !== -1 ? row[colPeriod] : "Année scolaire").trim() || "Année scolaire",
+            description: (colDesc !== -1 ? row[colDesc] : row[20] || "Projet d'échange").trim() || "Projet d'échange",
+            searchDetails: (colDetails !== -1 ? row[colDetails] : "").trim(),
+            contactFirstName,
+            contactLastName,
+            contactFunction: "Professeur / Responsable",
+            contactEmail: (colEmail !== -1 ? row[colEmail] : "").trim(),
+            contactPhone: (colPhone !== -1 ? row[colPhone] : "").trim(),
+            createdAt: rowDate,
             latitude: coords ? coords.lat : 46.22,
             longitude: coords ? coords.lng : 2.21,
           });
         }
 
         if (sheetProjects.length > 0) {
-          // Si la feuille contient au moins 10 annonces, elle est considérée comme la source de vérité.
-          // Ainsi, toute annonce supprimée de la feuille disparaît automatiquement de la carte !
+          // Si la feuille contient au moins 10 annonces, elle est considérée comme la source de vérité
           if (sheetProjects.length >= allProjects.length * 0.7) {
             allProjects = deduplicateProjects(sheetProjects);
           } else {
