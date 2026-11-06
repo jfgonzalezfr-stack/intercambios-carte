@@ -477,9 +477,22 @@
       return Array.from(map.values());
     }
 
-    // Géocodage instantané avec dictionnaire + cache
-    async function geocodeLocationFast(city, country) {
+    // Coordonnées ultra-rapides et infaillibles sans blocage réseau (0 ms)
+    function getInstantCoordinates(city, country, schoolName) {
       const cleanCity = (city || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const cleanSchool = (schoolName || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      // 1. Chercher dans les coordonnées déjà chargées et validées
+      if (window.cachedCoordsMap) {
+        if (window.cachedCoordsMap.has(`${cleanSchool}___${cleanCity}`)) {
+          return window.cachedCoordsMap.get(`${cleanSchool}___${cleanCity}`);
+        }
+        if (window.cachedCoordsMap.has(cleanCity)) {
+          return window.cachedCoordsMap.get(cleanCity);
+        }
+      }
+
+      // 2. Dictionnaire haute fidélité
       if (FAST_CITIES[cleanCity]) {
         return FAST_CITIES[cleanCity];
       }
@@ -488,28 +501,13 @@
           return coords;
         }
       }
-      const cacheKey = `geo_${cleanCity}_${(country || 'fr').toLowerCase()}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        try { return JSON.parse(cached); } catch(e) {}
-      }
-      try {
-        const q = encodeURIComponent(`${city}, ${country || 'France'}`);
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-            localStorage.setItem(cacheKey, JSON.stringify(coords));
-            return coords;
-          }
-        }
-      } catch (err) {}
 
-      // Fallback pays
+      // 3. Fallback immédiat par pays avec un léger décalage pour la visibilité
       const c = (country || '').toLowerCase();
-      if (c.includes('esp')) return { lat: 40.4168, lng: -3.7038 };
-      return { lat: 46.2276, lng: 2.2137 };
+      if (c.includes('esp')) {
+        return { lat: 40.4168 + (Math.random() - 0.5) * 1.5, lng: -3.7038 + (Math.random() - 0.5) * 1.5 };
+      }
+      return { lat: 46.2276 + (Math.random() - 0.5) * 2, lng: 2.2137 + (Math.random() - 0.5) * 2 };
     }
 
     // Parseur CSV robuste supportant les champs multilignes et guillemets
@@ -620,9 +618,9 @@
             }
           }
 
-          // Si les coordonnées ne sont pas dans la feuille, utiliser le dictionnaire local instantané
+          // Si les coordonnées ne sont pas dans la feuille, utiliser le dictionnaire ou les coordonnées existantes
           if (!coords) {
-            coords = await geocodeLocationFast(city, country);
+            coords = getInstantCoordinates(city, country, schoolName);
           }
 
           const contactPerson = (colContact !== -1 ? row[colContact] : "").trim();
@@ -727,8 +725,9 @@
       document.getElementById('modalFunction').textContent = p.contactFunction || 'Enseignant';
 
       const emailBtn = document.getElementById('modalEmailBtn');
-      if (p.contactEmail) {
-        emailBtn.href = `mailto:${p.contactEmail}?subject=Contact échange scolaire via lacasadelprofe.fr (${encodeURIComponent(p.schoolName || '')})`;
+      const cleanEmail = (p.contactEmail || "").replace(/ARROBA|arroba|\[at\]|\(at\)/gi, "@").replace(/\s+/g, "").trim();
+      if (cleanEmail && cleanEmail.includes("@")) {
+        emailBtn.href = `mailto:${cleanEmail}?subject=Contact échange scolaire via lacasadelprofe.fr (${encodeURIComponent(p.schoolName || '')})`;
         emailBtn.style.display = 'inline-flex';
       } else {
         emailBtn.style.display = 'none';
@@ -896,14 +895,28 @@
     document.getElementById('typeFilter').addEventListener('change', applyFilters);
     document.getElementById('sortOrder').addEventListener('change', applyFilters);
 
-    // Chargement initial des annonces depuis projects.json avec déduplication
-    fetch('projects.json')
+    // Chargement initial des annonces depuis projects.json avec cache-buster et déduplication
+    fetch('projects.json?t=' + Date.now())
       .then(res => {
         if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
         return res.json();
       })
       .then(data => {
         allProjects = deduplicateProjects(data);
+
+        // Construire la table de coordonnées instantanée pour toutes les lignes du Google Sheet
+        window.cachedCoordsMap = new Map();
+        for (const p of allProjects) {
+          if (p.latitude && p.longitude) {
+            const kCity = (p.schoolCity || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const kSchool = (p.schoolName || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            window.cachedCoordsMap.set(`${kSchool}___${kCity}`, { lat: p.latitude, lng: p.longitude });
+            if (!window.cachedCoordsMap.has(kCity)) {
+              window.cachedCoordsMap.set(kCity, { lat: p.latitude, lng: p.longitude });
+            }
+          }
+        }
+
         applyFilters();
         lucide.createIcons();
         loadGoogleSheetUpdates();
